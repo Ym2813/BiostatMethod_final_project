@@ -20,7 +20,7 @@ cdi = read_csv("cdi.csv") %>%
 # summary continuous variables
 ```{r}
 cdi%>%
-select(area, pop,pop18,pop65,docs,beds,crimes,hsgrad,bagrad,poverty,unemp,pcincome,totalinc) %>%
+select(area, pop,pop18,pop65,docs,beds,crimes,hsgrad,bagrad,poverty,unemp,pcincome,totalinc,crm_1000) %>%
 summary()
 
 ```
