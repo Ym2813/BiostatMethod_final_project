@@ -12,7 +12,8 @@ library(readr)
 ## Import Date
 ```{r}
 cdi = read_csv("cdi.csv") %>%
-  janitor::clean_names()
+  janitor::clean_names() %>%
+  mutate(crm_1000 = 1000*(crimes/pop))
 ```
 
 
