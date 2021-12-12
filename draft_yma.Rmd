@@ -1,0 +1,148 @@
+---
+title: "draft_yma"
+author: "Anna Ma"
+date: "12/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readr)
+```
+
+## Data exploration
+
+ **Q: do we need to convert other variables to per 1,000 population? like docs, beds, etc.** 
+
+
+```{r, message=FALSE}
+cdi = read_csv("cdi.csv") %>%
+  janitor::clean_names() %>%
+  mutate(crm_1000 = 1000*(crimes/pop),
+         # convert region to factors and recoded them accordingly 
+         region = factor(region, levels = 1:4,
+                    labels = c("northeast", "north central", "south", "west"))) %>% view()
+  
+```
+
+### Descriptive statistics of all varaibles
+```{r statistic summary}
+
+cdi_descriptive = cdi %>% select(-c(id,cty,state,region))
+
+# Global
+skimr::skim(cdi_descriptive) %>% 
+  select(-c("skim_type","complete_rate")) %>% 
+  knitr::kable(
+    col.names = c("variable", "n_missing", "mean","sd","min","Q25","median","Q75","max","histogram"),
+    caption = "Global Summary", digits = 2)
+```
+
+Q: 1. do we need to group them by state or county? group by gounty gives 5000+ rows though...
+  2. do we need box plot still? 
+  3. again, transfer some variables to "per pop" / "per 1000 pop" ?
+
+
+### Descriptive analysis
+
+We can use the box plot/ or histogram to check for normality. But I forgot when do we need normality...isn't it for residual??
+
+```{r}
+par(mfrow=c(3,5))
+
+boxplot(cdi$area,  main = "area")
+boxplot(cdi$pop, main = "pop")
+boxplot(cdi$pop18, main = "pop18")
+boxplot(cdi$pop65, main = "pop65")
+
+boxplot(cdi$docs, main = "docs")
+boxplot(cdi$beds, main = "beds")
+boxplot(cdi$crimes, main = "crimes")
+boxplot(cdi$crm_1000,  main = "crm_1000")
+
+boxplot(cdi$hsgrad, main = "hsgrad")
+boxplot(cdi$bagrad, main = "bagrad")
+boxplot(cdi$poverty, main = "poverty")
+boxplot(cdi$unemp,main = "unemp")
+boxplot(cdi$pcincome, main = "pcincome")
+boxplot(cdi$totalinc, main = "totalinc")
+
+```
+
+
+
+### Correlation 
+
+#### Pairwise relationship 
+
+* This gives us an idea of the correlation between each variable, but my old project build whole model first then assessed the correlation. Need Discussion!
+
+```{r}
+library(corrplot)
+corrplot(cor(cdi_descriptive), type = "upper", diag = FALSE)
+```
+
+
+* Here is the correlation with pairs function. More specific than the heat map above. We can observe the correlation bewteen all the terms here
+```{r}
+pairs(crm_1000 ~.,data=cdi_descriptive, panel = panel.smooth, upper.panel = NULL, main = "Scatterplot Matrix")
+```
+
+#### Marginal distribution ?
+
+
+### Distribution of outcome
+
+```{r}
+cdi %>% 
+  ggplot(aes(x = crm_1000)) +
+  geom_histogram()
+
+# log transfor the outcome
+cdi %>% 
+  ggplot(aes(x = log(crm_1000))) +
+  geom_histogram()
+
+
+```
+
+do we look at the distribution of outcome like this and transform them here? check again
+
+### States with unusual rates
+
+group by state
+```{r}
+cdi_by_state = cdi %>% group_by(state) %>% 
+  summarise(state_pop = sum(pop),
+            state_crimes = sum(crimes)) %>% 
+  mutate(state_CRM_1000 = 1000*state_crimes/state_pop)
+```
+
+Not sure what counts as out lier, this is what the other group did. 
+
+```{r}
+upper = quantile(cdi$crm_1000, 0.75)
+lower = quantile(cdi$crm_1000, 0.25)
+IQR = upper - lower
+cdi %>% 
+  filter(crm_1000 > upper + 1.5*IQR,
+         crm_1000 > lower - 1.5*IQR) %>% 
+  dplyr::select(cty, crm_1000) %>%
+  knitr::kable(digits = 2)
+```
+
+
+This shows no outlier on the state level tho... 
+
+```{r}
+upper = quantile(cdi_by_state$state_CRM_1000, 0.75)
+lower = quantile(cdi_by_state$state_CRM_1000, 0.25)
+IQR = upper - lower
+cdi_by_state %>% 
+  filter(state_CRM_1000 > upper + 1.5*IQR,
+         state_CRM_1000 > lower - 1.5*IQR) %>% 
+  dplyr::select(state, state_CRM_1000) %>%
+  knitr::kable(digits = 2)
+boxplot(cdi_by_state$state_CRM_1000, main = 'State Crime Rate per 1000 people')
+```
