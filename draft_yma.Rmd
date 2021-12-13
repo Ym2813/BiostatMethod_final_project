@@ -87,6 +87,7 @@ boxplot(cdi$totalinc, main = "totalinc")
 
 ```{r}
 library(corrplot)
+cor(cdi_descriptive) %>% knitr::kable()
 corrplot(cor(cdi_descriptive), type = "upper", diag = FALSE)
 ```
 
