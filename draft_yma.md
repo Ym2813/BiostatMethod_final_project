@@ -11,8 +11,8 @@ Anna Ma
 cdi = read_csv("cdi.csv") %>%
   janitor::clean_names() %>%
   mutate(crm_1000 = 1000*(crimes/pop),
-         pdocs = docs/pop,
-         pbeds = beds/pop,
+         pdocs_1000 = 1000*(docs/pop),
+         pbeds_1000 = 1000*(beds/pop),
          density_pop = pop/area,
          # convert region to factors and recoded them accordingly 
          region = factor(region, levels = 1:4,
@@ -49,8 +49,8 @@ skimr::skim(cdi_descriptive) %>%
 | pcincome (in dollars)            |          0 |  18561.4818 |   4059.1920 |   8899.0000 |  16118.2500 |  17759.0000 |  20270.0000 |   37541.0000 | ▁▇▂▁▁     |
 | totalinc (in million of dollars) |          0 |   7869.2727 |  12884.3215 |   1141.0000 |   2311.0000 |   3857.0000 |   8654.2500 |  184230.0000 | ▇▁▁▁▁     |
 | crm\_1000                        |          0 |     57.2864 |     27.3277 |      4.6014 |     38.1019 |     52.4286 |     72.5969 |     295.9867 | ▇▅▁▁▁     |
-| pdocs                            |          0 |      0.0021 |      0.0015 |      0.0004 |      0.0012 |      0.0018 |      0.0025 |       0.0170 | ▇▁▁▁▁     |
-| pbeds                            |          0 |      0.0036 |      0.0020 |      0.0002 |      0.0022 |      0.0033 |      0.0046 |       0.0197 | ▇▃▁▁▁     |
+| pdocs\_1000                      |          0 |      2.1230 |      1.5329 |      0.3559 |      1.2127 |      1.7509 |      2.4915 |      17.0377 | ▇▁▁▁▁     |
+| pbeds\_1000                      |          0 |      3.6493 |      2.0011 |      0.1649 |      2.1972 |      3.3287 |      4.5649 |      19.6982 | ▇▃▁▁▁     |
 | density\_pop                     |          0 |    888.4388 |   2194.7231 |     13.2587 |    192.3449 |    335.9081 |    756.5516 |   32403.7183 | ▇▁▁▁▁     |
 
 Global Summary
@@ -74,8 +74,8 @@ boxplot(cdi$pop, main = "pop")
 boxplot(cdi$pop18, main = "pop18")
 boxplot(cdi$pop65, main = "pop65")
 
-boxplot(cdi$pdocs, main = "pdocs")
-boxplot(cdi$pbeds, main = "pbeds")
+boxplot(cdi$pdocs_1000, main = "pdocs_1000")
+boxplot(cdi$pbeds_1000, main = "pbeds_1000")
 
 boxplot(cdi$crm_1000,  main = "crm_1000")
 
@@ -122,117 +122,140 @@ pairs(crm_1000 ~.,data=cdi_descriptive, panel = panel.smooth, upper.panel = NULL
 #### Marginal distribution ?
 
 ``` r
-cdi %>% ggplot(aes(x = density_pop, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+library(ggplot2)
+library(ggExtra)
+```
+
+``` r
+marg_den = cdi %>% ggplot(aes(x = density_pop, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_den, type = "histogram", fill="transparent")
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
-cdi %>% ggplot(aes(x = area, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+marg_area = cdi %>% ggplot(aes(x = area, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_area, type = "histogram", fill="transparent")
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
-cdi %>% ggplot(aes(x = pop, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+marg_pop = cdi %>% ggplot(aes(x = pop, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_pop, type = "histogram", fill="transparent")
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
-
-![](draft_yma_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
-
-``` r
-cdi %>% ggplot(aes(x = pop18, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
-```
-
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-5-4.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
+marg_pop18 = cdi %>% ggplot(aes(x = pop18, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
 # positive correlation
-cdi %>% ggplot(aes(x = pop65, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_pop18, type = "histogram", fill="transparent")
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-5-5.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
-cdi %>% ggplot(aes(x = pdocs, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+marg_pop65 = cdi %>% ggplot(aes(x = pop65, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_pop65, type = "histogram", fill="transparent")
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-5-6.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
-cdi %>% ggplot(aes(x = pbeds, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+marg_pdocs_1000 = cdi %>% ggplot(aes(x = pdocs_1000, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_pdocs_1000, type = "histogram", fill="transparent")
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-5-7.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
-cdi %>% ggplot(aes(x = hsgrad, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') #negative correlation
+marg_pbeds_1000 = cdi %>% ggplot(aes(x = pbeds_1000, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_pbeds_1000, type = "histogram", fill="transparent")
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-5-8.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
-cdi %>% ggplot(aes(x = bagrad, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+marg_hsgrad = cdi %>% ggplot(aes(x = hsgrad, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') #negative correlation
+ggMarginal(marg_hsgrad, type = "histogram", fill="transparent")
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-5-9.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
-cdi %>% ggplot(aes(x = poverty, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') # positive correlation
+marg_bagrad = cdi %>% ggplot(aes(x = bagrad, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_bagrad, type = "histogram", fill="transparent")
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-5-10.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
-cdi %>% ggplot(aes(x = unemp, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+marg_poverty = cdi %>% ggplot(aes(x = poverty, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') # positive correlation
+ggMarginal(marg_poverty, type = "histogram", fill="transparent")
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-5-11.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
-cdi %>% ggplot(aes(x = pcincome, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+marg_unemp = cdi %>% ggplot(aes(x = unemp, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_unemp, type = "histogram", fill="transparent")
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-5-12.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
-cdi %>% ggplot(aes(x = totalinc, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+marg_pcincome = cdi %>% ggplot(aes(x = pcincome, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_pcincome, type = "histogram", fill="transparent")
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-5-13.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
-cdi %>% ggplot(aes(x = region, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+marg_totalinc = cdi %>% ggplot(aes(x = totalinc, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_totalinc, type = "histogram", fill="transparent")
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-5-14.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 ### Distribution of outcome
 
@@ -244,7 +267,7 @@ cdi %>%
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 ``` r
 # log transfor the outcome
@@ -255,7 +278,7 @@ cdi %>%
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-19-2.png)<!-- -->
 
 do we look at the distribution of outcome like this and transform them
 here? check again
@@ -311,4 +334,4 @@ cdi_by_state %>%
 boxplot(cdi_by_state$state_CRM_1000, main = 'State Crime Rate per 1000 people')
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->

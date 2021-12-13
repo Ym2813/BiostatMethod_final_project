@@ -20,8 +20,8 @@ library(readr)
 cdi = read_csv("cdi.csv") %>%
   janitor::clean_names() %>%
   mutate(crm_1000 = 1000*(crimes/pop),
-         pdocs = docs/pop,
-         pbeds = beds/pop,
+         pdocs_1000 = 1000*(docs/pop),
+         pbeds_1000 = 1000*(beds/pop),
          density_pop = pop/area,
          # convert region to factors and recoded them accordingly 
          region = factor(region, levels = 1:4,
@@ -64,8 +64,8 @@ boxplot(cdi$pop, main = "pop")
 boxplot(cdi$pop18, main = "pop18")
 boxplot(cdi$pop65, main = "pop65")
 
-boxplot(cdi$pdocs, main = "pdocs")
-boxplot(cdi$pbeds, main = "pbeds")
+boxplot(cdi$pdocs_1000, main = "pdocs_1000")
+boxplot(cdi$pbeds_1000, main = "pbeds_1000")
 
 boxplot(cdi$crm_1000,  main = "crm_1000")
 
@@ -99,33 +99,75 @@ pairs(crm_1000 ~.,data=cdi_descriptive, panel = panel.smooth, upper.panel = NULL
 #### Marginal distribution ?
 
 ```{r}
-cdi %>% ggplot(aes(x = density_pop, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+library(ggplot2)
+library(ggExtra)
 
-cdi %>% ggplot(aes(x = area, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+```
 
-cdi %>% ggplot(aes(x = pop, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+```{r}
+marg_den = cdi %>% ggplot(aes(x = density_pop, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_den, type = "histogram", fill="transparent")
+```
 
-cdi %>% ggplot(aes(x = pop18, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+```{r}
+marg_area = cdi %>% ggplot(aes(x = area, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_area, type = "histogram", fill="transparent")
+```
+
+```{r}
+marg_pop = cdi %>% ggplot(aes(x = pop, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_pop, type = "histogram", fill="transparent")
+```
+
+```{r}
+marg_pop18 = cdi %>% ggplot(aes(x = pop18, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
 # positive correlation
-cdi %>% ggplot(aes(x = pop65, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_pop18, type = "histogram", fill="transparent")
+```
 
-cdi %>% ggplot(aes(x = pdocs, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+```{r}
+marg_pop65 = cdi %>% ggplot(aes(x = pop65, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_pop65, type = "histogram", fill="transparent")
+```
 
-cdi %>% ggplot(aes(x = pbeds, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+```{r}
+marg_pdocs_1000 = cdi %>% ggplot(aes(x = pdocs_1000, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_pdocs_1000, type = "histogram", fill="transparent")
+```
 
-cdi %>% ggplot(aes(x = hsgrad, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') #negative correlation
+```{r}
+marg_pbeds_1000 = cdi %>% ggplot(aes(x = pbeds_1000, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_pbeds_1000, type = "histogram", fill="transparent")
+```
 
-cdi %>% ggplot(aes(x = bagrad, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+```{r}
+marg_hsgrad = cdi %>% ggplot(aes(x = hsgrad, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') #negative correlation
+ggMarginal(marg_hsgrad, type = "histogram", fill="transparent")
+```
 
-cdi %>% ggplot(aes(x = poverty, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') # positive correlation
+```{r}
+marg_bagrad = cdi %>% ggplot(aes(x = bagrad, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_bagrad, type = "histogram", fill="transparent")
+```
 
-cdi %>% ggplot(aes(x = unemp, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+```{r}
+marg_poverty = cdi %>% ggplot(aes(x = poverty, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') # positive correlation
+ggMarginal(marg_poverty, type = "histogram", fill="transparent")
+```
 
-cdi %>% ggplot(aes(x = pcincome, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+```{r}
+marg_unemp = cdi %>% ggplot(aes(x = unemp, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_unemp, type = "histogram", fill="transparent")
+```
 
-cdi %>% ggplot(aes(x = totalinc, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+```{r}
+marg_pcincome = cdi %>% ggplot(aes(x = pcincome, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_pcincome, type = "histogram", fill="transparent")
+```
 
-cdi %>% ggplot(aes(x = region, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+```{r}
+marg_totalinc = cdi %>% ggplot(aes(x = totalinc, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+ggMarginal(marg_totalinc, type = "histogram", fill="transparent")
 ```
 
 
