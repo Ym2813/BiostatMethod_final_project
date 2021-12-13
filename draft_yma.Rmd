@@ -13,16 +13,19 @@ library(readr)
 
 ## Data exploration
 
- **Q: do we need to convert other variables to per 1,000 population? like docs, beds, etc.** 
+ **converted variables to per person and docs, beds, etc.** 
 
 
 ```{r, message=FALSE}
 cdi = read_csv("cdi.csv") %>%
   janitor::clean_names() %>%
   mutate(crm_1000 = 1000*(crimes/pop),
+         pdocs = docs/pop,
+         pbeds = beds/pop,
+         density_pop = pop/area,
          # convert region to factors and recoded them accordingly 
          region = factor(region, levels = 1:4,
-                    labels = c("northeast", "north central", "south", "west"))) %>% view()
+                    labels = c("northeast", "north central", "south", "west"))) %>% select(-c(docs,beds)) %>% view()
   
 ```
 
@@ -34,9 +37,12 @@ cdi_descriptive = cdi %>% select(-c(id,cty,state,region))
 # Global
 skimr::skim(cdi_descriptive) %>% 
   select(-c("skim_type","complete_rate")) %>% 
+    mutate(skim_variable = 
+             recode(skim_variable, pcincome = "pcincome (in dollars)", totalinc = "totalinc (in million of dollars)"
+  )) %>% 
   knitr::kable(
     col.names = c("variable", "n_missing", "mean","sd","min","Q25","median","Q75","max","histogram"),
-    caption = "Global Summary", digits = 2)
+    caption = "Global Summary", digits = 4)
 ```
 
 Q: 1. do we need to group them by state or county? group by gounty gives 5000+ rows though...
@@ -49,16 +55,18 @@ Q: 1. do we need to group them by state or county? group by gounty gives 5000+ r
 We can use the box plot/ or histogram to check for normality. But I forgot when do we need normality...isn't it for residual??
 
 ```{r}
-par(mfrow=c(3,5))
+par(mfrow = c(3,5))
 
-boxplot(cdi$area,  main = "area")
+boxplot(cdi$density_pop,  main = "density_pop")
+boxplot(cdi$area, main = "area")
+
 boxplot(cdi$pop, main = "pop")
 boxplot(cdi$pop18, main = "pop18")
 boxplot(cdi$pop65, main = "pop65")
 
-boxplot(cdi$docs, main = "docs")
-boxplot(cdi$beds, main = "beds")
-boxplot(cdi$crimes, main = "crimes")
+boxplot(cdi$pdocs, main = "pdocs")
+boxplot(cdi$pbeds, main = "pbeds")
+
 boxplot(cdi$crm_1000,  main = "crm_1000")
 
 boxplot(cdi$hsgrad, main = "hsgrad")
@@ -84,12 +92,43 @@ corrplot(cor(cdi_descriptive), type = "upper", diag = FALSE)
 ```
 
 
-* Here is the correlation with pairs function. More specific than the heat map above. We can observe the correlation bewteen all the terms here
+* Here is the correlation with pairs function. More specific than the heat map above. We can observe the correlation between all the terms here
 ```{r}
 pairs(crm_1000 ~.,data=cdi_descriptive, panel = panel.smooth, upper.panel = NULL, main = "Scatterplot Matrix")
 ```
 
 #### Marginal distribution ?
+
+```{r}
+cdi %>% ggplot(aes(x = density_pop, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+
+cdi %>% ggplot(aes(x = area, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+
+cdi %>% ggplot(aes(x = pop, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+
+cdi %>% ggplot(aes(x = pop18, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+# positive correlation
+cdi %>% ggplot(aes(x = pop65, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+
+cdi %>% ggplot(aes(x = pdocs, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+
+cdi %>% ggplot(aes(x = pbeds, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+
+cdi %>% ggplot(aes(x = hsgrad, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') #negative correlation
+
+cdi %>% ggplot(aes(x = bagrad, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+
+cdi %>% ggplot(aes(x = poverty, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') # positive correlation
+
+cdi %>% ggplot(aes(x = unemp, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+
+cdi %>% ggplot(aes(x = pcincome, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+
+cdi %>% ggplot(aes(x = totalinc, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+
+cdi %>% ggplot(aes(x = region, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+```
+
 
 
 ### Distribution of outcome
