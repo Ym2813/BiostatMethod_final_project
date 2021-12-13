@@ -126,7 +126,20 @@ cor(cdi_descriptive) %>% knitr::kable()
 | density\_pop | -0.1568156 |  0.3220266 |  0.1254644 |  0.0291845 |  0.5609842 | -0.1040070 |  0.1556063 |  0.1265079 |  0.0227179 |  0.2332260 |  0.3162048 |  0.4804285 |   0.3180424 |   0.2064177 |    1.0000000 |
 
 ``` r
-corrplot(cor(cdi_descriptive), type = "upper", diag = FALSE)
+library(ggcorrplot)
+library(ggstatsplot)
+```
+
+    ## You can cite this package as:
+    ##      Patil, I. (2021). Visualizations with statistical details: The 'ggstatsplot' approach.
+    ##      Journal of Open Source Software, 6(61), 3167, doi:10.21105/joss.03167
+
+``` r
+ggstatsplot::ggcorrmat(
+  data = cdi,
+  type = "parametric", # parametric for Pearson, nonparametric for Spearman's correlation
+  colors = c("darkred", "white", "steelblue") # change default colors
+)
 ```
 
 ![](draft_yma_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
@@ -357,3 +370,471 @@ boxplot(cdi_by_state$state_CRM_1000, main = 'State Crime Rate per 1000 people')
 ```
 
 ![](draft_yma_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+
+**we probably need to plot region as well? not sure**
+
+## Model!
+
+**Q: do we need more descriptive analysis, visualization? rate of crime
+for each state?** **there’s a few duplicated cty, but different area,
+maybe diff place then? not sure** they can’t be the same… otherwise we
+have to recalculate some stuff… duplicated(cdi\[,2:3\]) cdi %&gt;%
+filter(cty == “Baltimor”) cdi %&gt;% filter(cty == “St.\_Loui”)
+
+#### Full model predictors ok?
+
+included pop in addition to pop18, pop65. Do we need pop tho? Would
+pop18 and pop65 be enough already?
+
+did not include cty, state, area, crimes, totalinc, totalinc (included
+pcincome), do we need to include any of those? for example, both
+totalinc and pcincome, area and pop\_den
+
+this model used `northeast` as the reference level for region
+
+``` r
+cdi_model = cdi %>% select(-c(id,cty,state,area,crimes,totalinc))
+
+# use 
+full_fit = lm(crm_1000 ~ ., data = cdi_model)
+summary(full_fit)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = crm_1000 ~ ., data = cdi_model)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -47.786 -11.422  -0.934  10.200  75.180 
+    ## 
+    ## Coefficients:
+    ##                       Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)         -6.922e+01  2.739e+01  -2.528 0.011849 *  
+    ## pop                  5.486e-06  1.579e-06   3.474 0.000566 ***
+    ## pop18                6.947e-01  3.305e-01   2.102 0.036150 *  
+    ## pop65               -1.998e-01  3.055e-01  -0.654 0.513410    
+    ## hsgrad               6.143e-01  2.690e-01   2.284 0.022864 *  
+    ## bagrad              -4.835e-01  2.971e-01  -1.628 0.104327    
+    ## poverty              1.856e+00  3.864e-01   4.803 2.17e-06 ***
+    ## unemp                6.111e-01  5.314e-01   1.150 0.250812    
+    ## pcincome             1.039e-03  4.734e-04   2.195 0.028670 *  
+    ## regionnorth central  8.978e+00  2.732e+00   3.286 0.001100 ** 
+    ## regionsouth          2.779e+01  2.659e+00  10.453  < 2e-16 ***
+    ## regionwest           2.118e+01  3.125e+00   6.778 4.09e-11 ***
+    ## pdocs_1000          -6.634e-01  1.019e+00  -0.651 0.515556    
+    ## pbeds_1000           3.157e+00  7.939e-01   3.977 8.21e-05 ***
+    ## density_pop          4.901e-03  4.537e-04  10.802  < 2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 17.81 on 425 degrees of freedom
+    ## Multiple R-squared:  0.589,  Adjusted R-squared:  0.5755 
+    ## F-statistic: 43.51 on 14 and 425 DF,  p-value: < 2.2e-16
+
+#### Backward
+
+``` r
+fit_back = step(full_fit, direction='backward')
+```
+
+    ## Start:  AIC=2548.68
+    ## crm_1000 ~ pop + pop18 + pop65 + hsgrad + bagrad + poverty + 
+    ##     unemp + pcincome + region + pdocs_1000 + pbeds_1000 + density_pop
+    ## 
+    ##               Df Sum of Sq    RSS    AIC
+    ## - pdocs_1000   1       134 134867 2547.1
+    ## - pop65        1       136 134869 2547.1
+    ## - unemp        1       419 135152 2548.1
+    ## <none>                     134733 2548.7
+    ## - bagrad       1       840 135573 2549.4
+    ## - pop18        1      1401 136134 2551.2
+    ## - pcincome     1      1528 136261 2551.6
+    ## - hsgrad       1      1654 136387 2552.1
+    ## - pop          1      3825 138558 2559.0
+    ## - pbeds_1000   1      5013 139747 2562.8
+    ## - poverty      1      7313 142046 2569.9
+    ## - density_pop  1     36989 171723 2653.4
+    ## - region       3     39099 173832 2654.8
+    ## 
+    ## Step:  AIC=2547.12
+    ## crm_1000 ~ pop + pop18 + pop65 + hsgrad + bagrad + poverty + 
+    ##     unemp + pcincome + region + pbeds_1000 + density_pop
+    ## 
+    ##               Df Sum of Sq    RSS    AIC
+    ## - pop65        1       130 134998 2545.6
+    ## - unemp        1       410 135278 2546.5
+    ## <none>                     134867 2547.1
+    ## - bagrad       1      1080 135948 2548.6
+    ## - pop18        1      1338 136206 2549.5
+    ## - pcincome     1      1438 136305 2549.8
+    ## - hsgrad       1      1744 136611 2550.8
+    ## - pop          1      3789 138656 2557.3
+    ## - poverty      1      7414 142281 2568.7
+    ## - pbeds_1000   1      7715 142583 2569.6
+    ## - density_pop  1     36918 171785 2651.6
+    ## - region       3     38974 173841 2652.8
+    ## 
+    ## Step:  AIC=2545.55
+    ## crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + 
+    ##     pcincome + region + pbeds_1000 + density_pop
+    ## 
+    ##               Df Sum of Sq    RSS    AIC
+    ## - unemp        1       360 135358 2544.7
+    ## <none>                     134998 2545.6
+    ## - bagrad       1      1079 136077 2547.1
+    ## - pcincome     1      1505 136503 2548.4
+    ## - hsgrad       1      1806 136804 2549.4
+    ## - pop18        1      2397 137395 2551.3
+    ## - pop          1      3746 138744 2555.6
+    ## - poverty      1      8138 143136 2569.3
+    ## - pbeds_1000   1      8151 143149 2569.3
+    ## - density_pop  1     36790 171787 2649.6
+    ## - region       3     39013 174011 2651.2
+    ## 
+    ## Step:  AIC=2544.72
+    ## crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + 
+    ##     region + pbeds_1000 + density_pop
+    ## 
+    ##               Df Sum of Sq    RSS    AIC
+    ## <none>                     135358 2544.7
+    ## - bagrad       1      1402 136760 2547.2
+    ## - hsgrad       1      1571 136929 2547.8
+    ## - pcincome     1      1834 137192 2548.6
+    ## - pop18        1      2389 137748 2550.4
+    ## - pop          1      3652 139010 2554.4
+    ## - pbeds_1000   1      7843 143201 2567.5
+    ## - poverty      1     10154 145512 2574.6
+    ## - density_pop  1     36580 171938 2648.0
+    ## - region       3     40192 175550 2653.1
+
+``` r
+fit_back
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    ##     pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
+    ## 
+    ## Coefficients:
+    ##         (Intercept)                  pop                pop18  
+    ##          -6.700e+01            5.350e-06            7.817e-01  
+    ##              hsgrad               bagrad              poverty  
+    ##           5.852e-01           -5.929e-01            2.039e+00  
+    ##            pcincome  regionnorth central          regionsouth  
+    ##           1.109e-03            9.017e+00            2.703e+01  
+    ##          regionwest           pbeds_1000          density_pop  
+    ##           2.083e+01            2.497e+00            4.834e-03
+
+crm\_1000 \~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + region
++ pbeds\_1000 + density\_pop, data = cdi\_model
+
+#### forward
+
+``` r
+fit_forward = step(full_fit, direction='forward')
+```
+
+    ## Start:  AIC=2548.68
+    ## crm_1000 ~ pop + pop18 + pop65 + hsgrad + bagrad + poverty + 
+    ##     unemp + pcincome + region + pdocs_1000 + pbeds_1000 + density_pop
+
+``` r
+fit_forward
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = crm_1000 ~ pop + pop18 + pop65 + hsgrad + bagrad + 
+    ##     poverty + unemp + pcincome + region + pdocs_1000 + pbeds_1000 + 
+    ##     density_pop, data = cdi_model)
+    ## 
+    ## Coefficients:
+    ##         (Intercept)                  pop                pop18  
+    ##          -6.922e+01            5.486e-06            6.947e-01  
+    ##               pop65               hsgrad               bagrad  
+    ##          -1.998e-01            6.143e-01           -4.835e-01  
+    ##             poverty                unemp             pcincome  
+    ##           1.856e+00            6.111e-01            1.039e-03  
+    ## regionnorth central          regionsouth           regionwest  
+    ##           8.978e+00            2.779e+01            2.118e+01  
+    ##          pdocs_1000           pbeds_1000          density_pop  
+    ##          -6.634e-01            3.157e+00            4.901e-03
+
+crm\_1000 \~ pop + pop18 + pop65 + hsgrad + bagrad + poverty + unemp +
+pcincome + region + pdocs\_1000 + pbeds\_1000 + density\_pop, data =
+cdi\_model
+
+#### both
+
+step-wise?
+
+``` r
+fit_both = step(full_fit, direction='both')
+```
+
+    ## Start:  AIC=2548.68
+    ## crm_1000 ~ pop + pop18 + pop65 + hsgrad + bagrad + poverty + 
+    ##     unemp + pcincome + region + pdocs_1000 + pbeds_1000 + density_pop
+    ## 
+    ##               Df Sum of Sq    RSS    AIC
+    ## - pdocs_1000   1       134 134867 2547.1
+    ## - pop65        1       136 134869 2547.1
+    ## - unemp        1       419 135152 2548.1
+    ## <none>                     134733 2548.7
+    ## - bagrad       1       840 135573 2549.4
+    ## - pop18        1      1401 136134 2551.2
+    ## - pcincome     1      1528 136261 2551.6
+    ## - hsgrad       1      1654 136387 2552.1
+    ## - pop          1      3825 138558 2559.0
+    ## - pbeds_1000   1      5013 139747 2562.8
+    ## - poverty      1      7313 142046 2569.9
+    ## - density_pop  1     36989 171723 2653.4
+    ## - region       3     39099 173832 2654.8
+    ## 
+    ## Step:  AIC=2547.12
+    ## crm_1000 ~ pop + pop18 + pop65 + hsgrad + bagrad + poverty + 
+    ##     unemp + pcincome + region + pbeds_1000 + density_pop
+    ## 
+    ##               Df Sum of Sq    RSS    AIC
+    ## - pop65        1       130 134998 2545.6
+    ## - unemp        1       410 135278 2546.5
+    ## <none>                     134867 2547.1
+    ## - bagrad       1      1080 135948 2548.6
+    ## + pdocs_1000   1       134 134733 2548.7
+    ## - pop18        1      1338 136206 2549.5
+    ## - pcincome     1      1438 136305 2549.8
+    ## - hsgrad       1      1744 136611 2550.8
+    ## - pop          1      3789 138656 2557.3
+    ## - poverty      1      7414 142281 2568.7
+    ## - pbeds_1000   1      7715 142583 2569.6
+    ## - density_pop  1     36918 171785 2651.6
+    ## - region       3     38974 173841 2652.8
+    ## 
+    ## Step:  AIC=2545.55
+    ## crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + 
+    ##     pcincome + region + pbeds_1000 + density_pop
+    ## 
+    ##               Df Sum of Sq    RSS    AIC
+    ## - unemp        1       360 135358 2544.7
+    ## <none>                     134998 2545.6
+    ## - bagrad       1      1079 136077 2547.1
+    ## + pop65        1       130 134867 2547.1
+    ## + pdocs_1000   1       129 134869 2547.1
+    ## - pcincome     1      1505 136503 2548.4
+    ## - hsgrad       1      1806 136804 2549.4
+    ## - pop18        1      2397 137395 2551.3
+    ## - pop          1      3746 138744 2555.6
+    ## - poverty      1      8138 143136 2569.3
+    ## - pbeds_1000   1      8151 143149 2569.3
+    ## - density_pop  1     36790 171787 2649.6
+    ## - region       3     39013 174011 2651.2
+    ## 
+    ## Step:  AIC=2544.72
+    ## crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + 
+    ##     region + pbeds_1000 + density_pop
+    ## 
+    ##               Df Sum of Sq    RSS    AIC
+    ## <none>                     135358 2544.7
+    ## + unemp        1       360 134998 2545.6
+    ## + pdocs_1000   1       122 135236 2546.3
+    ## + pop65        1        80 135278 2546.5
+    ## - bagrad       1      1402 136760 2547.2
+    ## - hsgrad       1      1571 136929 2547.8
+    ## - pcincome     1      1834 137192 2548.6
+    ## - pop18        1      2389 137748 2550.4
+    ## - pop          1      3652 139010 2554.4
+    ## - pbeds_1000   1      7843 143201 2567.5
+    ## - poverty      1     10154 145512 2574.6
+    ## - density_pop  1     36580 171938 2648.0
+    ## - region       3     40192 175550 2653.1
+
+``` r
+fit_both
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    ##     pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
+    ## 
+    ## Coefficients:
+    ##         (Intercept)                  pop                pop18  
+    ##          -6.700e+01            5.350e-06            7.817e-01  
+    ##              hsgrad               bagrad              poverty  
+    ##           5.852e-01           -5.929e-01            2.039e+00  
+    ##            pcincome  regionnorth central          regionsouth  
+    ##           1.109e-03            9.017e+00            2.703e+01  
+    ##          regionwest           pbeds_1000          density_pop  
+    ##           2.083e+01            2.497e+00            4.834e-03
+
+crm\_1000 \~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + region
++ pbeds\_1000 + density\_pop, data = cdi\_model This gives back the same
+model as back
+
+Some group forward again based on their first time step wise…not sure if
+we need to do that tho
+
+### Test based procedures
+
+#### Cp
+
+I didn’t include the full model here
+
+**backward & both**
+
+``` r
+# printing the 2 best models of each size. For example, the first two lines: print the best 2 models that have 2 variables (including intercept)
+library(leaps)
+Cp_b = leaps(x = model.matrix(fit_back)[,-1],
+      y = cdi_model$crm_1000,
+      nbest = 2,
+      method = "Cp")
+Cp_b
+```
+
+    ## $which
+    ##        1     2     3     4     5     6     7     8     9     A     B
+    ## 1  FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
+    ## 1  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE
+    ## 2  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE
+    ## 2  FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE
+    ## 3  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE
+    ## 3  FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE
+    ## 4  FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 4  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE FALSE  TRUE
+    ## 5  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 5  FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE FALSE  TRUE
+    ## 6  FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 6   TRUE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 7   TRUE FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 7   TRUE FALSE  TRUE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 8   TRUE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 8   TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 9   TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 9   TRUE  TRUE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 10  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 10  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 11  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 
+    ## $label
+    ##  [1] "(Intercept)" "1"           "2"           "3"           "4"          
+    ##  [6] "5"           "6"           "7"           "8"           "9"          
+    ## [11] "A"           "B"          
+    ## 
+    ## $size
+    ##  [1]  2  2  3  3  4  4  5  5  6  6  7  7  8  8  9  9 10 10 11 11 12
+    ## 
+    ## $Cp
+    ##  [1] 361.37662 369.85075 185.35978 217.86627 115.16570 160.73877  83.84967
+    ##  [8]  84.08696  49.18224  63.36721  33.69922  34.29891  19.17558  24.91300
+    ## [15]  14.72619  14.79923  13.80739  14.07314  14.43365  14.96836  12.00000
+
+``` r
+Cp_b %>% faraway::Cpplot()
+```
+
+![](draft_yma_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+
+size is the number of parameters in the model, Cp is Cp
+
+The plot shows the model that satisfy the criteria, number indicates the
+number of parameters it included. in this case, the 1st to the last.
+
+**forward**
+
+``` r
+leaps(x = model.matrix(fit_forward)[,-1],
+      y = cdi_model$crm_1000,
+      nbest = 2,
+      method = "Cp") %>% faraway::Cpplot()
+```
+
+![](draft_yma_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+
+So, multiple model satisfies the Cp criteria here.
+
+#### Adj R2
+
+**backward**
+
+``` r
+adjr_b = leaps(x = model.matrix(fit_back)[,-1],
+      y = cdi_model$crm_1000,
+      nbest = 2,
+      method = "adjr2") 
+
+adjr_b
+```
+
+    ## $which
+    ##        1     2     3     4     5     6     7     8     9     A     B
+    ## 1  FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
+    ## 1  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE
+    ## 2  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE
+    ## 2  FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE
+    ## 3  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE
+    ## 3  FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE
+    ## 4  FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 4  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE FALSE  TRUE
+    ## 5  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 5  FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE FALSE  TRUE
+    ## 6  FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 6   TRUE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 7   TRUE FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 7   TRUE FALSE  TRUE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 8   TRUE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 8   TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 9   TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 9   TRUE  TRUE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 10  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 10  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 11  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 
+    ## $label
+    ##  [1] "(Intercept)" "1"           "2"           "3"           "4"          
+    ##  [6] "5"           "6"           "7"           "8"           "9"          
+    ## [11] "A"           "B"          
+    ## 
+    ## $size
+    ##  [1]  2  2  3  3  4  4  5  5  6  6  7  7  8  8  9  9 10 10 11 11 12
+    ## 
+    ## $adjr2
+    ##  [1] 0.2290554 0.2208622 0.3998009 0.3683000 0.4685454 0.4242809 0.4997575
+    ##  [8] 0.4995265 0.5343835 0.5205424 0.5504069 0.5498204 0.5655639 0.5599397
+    ## [15] 0.5708928 0.5708211 0.5727695 0.5725077 0.5731297 0.5726018 0.5765191
+
+``` r
+adjr_b%>% 
+  faraway::maxadjr(10)
+```
+
+    ## 1,2,3,4,5,6,7,8,9,10,11   1,2,3,5,6,7,8,9,10,11     1,2,5,6,7,8,9,10,11 
+    ##                   0.577                   0.573                   0.573 
+    ##   1,2,4,5,6,7,8,9,10,11     1,2,3,5,7,8,9,10,11       1,2,5,7,8,9,10,11 
+    ##                   0.573                   0.573                   0.571 
+    ##       1,3,5,7,8,9,10,11         1,5,7,8,9,10,11         1,3,5,8,9,10,11 
+    ##                   0.571                   0.566                   0.560 
+    ##           5,7,8,9,10,11 
+    ##                   0.550
+
+**forward**
+
+``` r
+leaps(x = model.matrix(fit_forward)[,-1],
+      y = cdi_model$crm_1000,
+      nbest = 2,
+      method = "adjr2") %>% faraway::maxadjr(10)
+```
+
+    ##      1,2,4,5,6,7,8,9,10,11,13,14        1,2,4,5,6,8,9,10,11,13,14 
+    ##                            0.577                            0.577 
+    ##    1,2,3,4,5,6,7,8,9,10,11,13,14   1,2,4,5,6,7,8,9,10,11,12,13,14 
+    ##                            0.576                            0.576 
+    ##     1,2,4,5,6,8,9,10,11,12,13,14 1,2,3,4,5,6,7,8,9,10,11,12,13,14 
+    ##                            0.576                            0.575 
+    ##        1,2,4,6,7,8,9,10,11,13,14          1,2,4,6,7,9,10,11,13,14 
+    ##                            0.574                            0.574 
+    ##          1,3,4,6,7,9,10,11,13,14            1,2,6,8,9,10,11,13,14 
+    ##                            0.573                            0.573
