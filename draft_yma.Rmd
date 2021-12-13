@@ -2,7 +2,7 @@
 title: "draft_yma"
 author: "Anna Ma"
 date: "12/12/2021"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -77,7 +77,6 @@ boxplot(cdi$pcincome, main = "pcincome")
 boxplot(cdi$totalinc, main = "totalinc")
 
 ```
-
 
 
 ### Correlation 
