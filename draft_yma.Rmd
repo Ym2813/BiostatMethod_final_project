@@ -289,34 +289,28 @@ lambda_trans
 ```
 
 
-
 #### Backward
 
 ```{r}
-fit_back = step(full_fit, direction='backward')
+fit_back = step(trans_fit, direction='backward')
 fit_back
 ```
 
-crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + 
-    pcincome + region + pbeds_1000 + density_pop, data = cdi_model
 
 #### forward 
 
 ```{r}
-fit_forward = step(full_fit, direction='forward')
+fit_forward = step(trans_fit, direction='forward')
 fit_forward
 ```
 
-crm_1000 ~ pop + pop18 + pop65 + hsgrad + bagrad + 
-    poverty + unemp + pcincome + region + pdocs_1000 + pbeds_1000 + 
-    density_pop, data = cdi_model
     
 #### both
 
 step-wise?
 
 ```{r}
-fit_both = step(full_fit, direction='both')
+fit_both = step(trans_fit, direction='both')
 fit_both
 ```
 
