@@ -383,7 +383,7 @@ leaps(x = model.matrix(fit_forward)[,-1],
 
 ```{r}
 # No docs
-step1 = update(full_fit, . ~ . -pdocs_1000)
+step1 = update(trans_fit, . ~ . -pdocs_1000)
 summary(step1)
 
 # No pop65
@@ -394,7 +394,10 @@ summary(step2)
 step3 = update(step2, . ~ . -unemp)
 summary(step3)
 
-mult.fit.final = lm(formula = crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+step4 = update(step3, . ~ . -hsgrad)
+summary(step4)
+
+mult.fit.final = lm(crm_1000^0.5 ~ pop + pop18 + bagrad + poverty + 
     pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
 summary(mult.fit.final)
 ```
