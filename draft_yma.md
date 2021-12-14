@@ -55,14 +55,6 @@ skimr::skim(cdi_descriptive) %>%
 
 Global Summary
 
-``` r
-ggplot(gather(cdi_descriptive), aes(value)) + 
-    geom_histogram(bins = 13) + 
-    facet_wrap(~key, scales = 'free_x')
-```
-
-![](draft_yma_files/figure-gfm/statistic%20summary-1.png)<!-- -->
-
 Q: 1. do we need to group them by state or county? group by gounty gives
 5000+ rows though… 2. do we need box plot still? 3. again, transfer some
 variables to “per pop” / “per 1000 pop” ?
@@ -73,9 +65,9 @@ We can use the box plot/ or histogram to check for normality. But I
 forgot when do we need normality…isn’t it for residual??
 
 ``` r
-par(mfrow = c(3,5))
+par(mfrow = c(2,7))
 
-boxplot(cdi$density_pop,  main = "density_pop")
+boxplot(cdi$density_pop, main = "density_pop")
 boxplot(cdi$area, main = "area")
 
 boxplot(cdi$pop, main = "pop")
@@ -311,17 +303,6 @@ cdi %>%
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
 ![](draft_yma_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
-
-``` r
-# log transfor the outcome
-cdi %>% 
-  ggplot(aes(x = log(crm_1000))) +
-  geom_histogram()
-```
-
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-
-![](draft_yma_files/figure-gfm/unnamed-chunk-19-2.png)<!-- -->
 
 do we look at the distribution of outcome like this and transform them
 here? check again
@@ -562,78 +543,78 @@ lambda_trans
 #### Backward
 
 ``` r
-fit_back = step(full_fit, direction='backward')
+fit_back = step(trans_fit, direction='backward')
 ```
 
-    ## Start:  AIC=2548.68
-    ## crm_1000 ~ pop + pop18 + pop65 + hsgrad + bagrad + poverty + 
+    ## Start:  AIC=153.85
+    ## crm_1000^0.5 ~ pop + pop18 + pop65 + hsgrad + bagrad + poverty + 
     ##     unemp + pcincome + region + pdocs_1000 + pbeds_1000 + density_pop
     ## 
     ##               Df Sum of Sq    RSS    AIC
-    ## - pdocs_1000   1       134 134867 2547.1
-    ## - pop65        1       136 134869 2547.1
-    ## - unemp        1       419 135152 2548.1
-    ## <none>                     134733 2548.7
-    ## - bagrad       1       840 135573 2549.4
-    ## - pop18        1      1401 136134 2551.2
-    ## - pcincome     1      1528 136261 2551.6
-    ## - hsgrad       1      1654 136387 2552.1
-    ## - pop          1      3825 138558 2559.0
-    ## - pbeds_1000   1      5013 139747 2562.8
-    ## - poverty      1      7313 142046 2569.9
-    ## - density_pop  1     36989 171723 2653.4
-    ## - region       3     39099 173832 2654.8
+    ## - pop65        1     0.044 583.09 151.89
+    ## - pdocs_1000   1     0.451 583.49 152.19
+    ## - unemp        1     2.081 585.12 153.42
+    ## <none>                     583.04 153.85
+    ## - bagrad       1     4.331 587.37 155.11
+    ## - hsgrad       1     5.303 588.35 155.84
+    ## - pop18        1    11.591 594.63 160.51
+    ## - pcincome     1    13.004 596.05 161.56
+    ## - pop          1    16.690 599.73 164.27
+    ## - pbeds_1000   1    22.604 605.65 168.59
+    ## - poverty      1    30.154 613.20 174.04
+    ## - density_pop  1    71.185 654.23 202.54
+    ## - region       3   205.212 788.25 280.54
     ## 
-    ## Step:  AIC=2547.12
-    ## crm_1000 ~ pop + pop18 + pop65 + hsgrad + bagrad + poverty + 
-    ##     unemp + pcincome + region + pbeds_1000 + density_pop
+    ## Step:  AIC=151.89
+    ## crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + 
+    ##     pcincome + region + pdocs_1000 + pbeds_1000 + density_pop
     ## 
     ##               Df Sum of Sq    RSS    AIC
-    ## - pop65        1       130 134998 2545.6
-    ## - unemp        1       410 135278 2546.5
-    ## <none>                     134867 2547.1
-    ## - bagrad       1      1080 135948 2548.6
-    ## - pop18        1      1338 136206 2549.5
-    ## - pcincome     1      1438 136305 2549.8
-    ## - hsgrad       1      1744 136611 2550.8
-    ## - pop          1      3789 138656 2557.3
-    ## - poverty      1      7414 142281 2568.7
-    ## - pbeds_1000   1      7715 142583 2569.6
-    ## - density_pop  1     36918 171785 2651.6
-    ## - region       3     38974 173841 2652.8
+    ## - pdocs_1000   1     0.446 583.53 150.22
+    ## - unemp        1     2.038 585.12 151.42
+    ## <none>                     583.09 151.89
+    ## - bagrad       1     4.334 587.42 153.15
+    ## - hsgrad       1     5.380 588.47 153.93
+    ## - pcincome     1    13.159 596.25 159.71
+    ## - pop18        1    16.404 599.49 162.09
+    ## - pop          1    16.651 599.74 162.28
+    ## - pbeds_1000   1    23.989 607.08 167.63
+    ## - poverty      1    31.904 614.99 173.33
+    ## - density_pop  1    71.276 654.36 200.63
+    ## - region       3   205.335 788.42 278.63
     ## 
-    ## Step:  AIC=2545.55
-    ## crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + 
+    ## Step:  AIC=150.22
+    ## crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + 
     ##     pcincome + region + pbeds_1000 + density_pop
     ## 
     ##               Df Sum of Sq    RSS    AIC
-    ## - unemp        1       360 135358 2544.7
-    ## <none>                     134998 2545.6
-    ## - bagrad       1      1079 136077 2547.1
-    ## - pcincome     1      1505 136503 2548.4
-    ## - hsgrad       1      1806 136804 2549.4
-    ## - pop18        1      2397 137395 2551.3
-    ## - pop          1      3746 138744 2555.6
-    ## - poverty      1      8138 143136 2569.3
-    ## - pbeds_1000   1      8151 143149 2569.3
-    ## - density_pop  1     36790 171787 2649.6
-    ## - region       3     39013 174011 2651.2
+    ## - unemp        1     2.006 585.54 149.73
+    ## <none>                     583.53 150.22
+    ## - bagrad       1     5.378 588.91 152.26
+    ## - hsgrad       1     5.671 589.20 152.48
+    ## - pcincome     1    12.753 596.29 157.74
+    ## - pop18        1    16.012 599.54 160.13
+    ## - pop          1    16.517 600.05 160.50
+    ## - poverty      1    32.264 615.80 171.90
+    ## - pbeds_1000   1    41.083 624.62 178.16
+    ## - density_pop  1    70.863 654.40 198.65
+    ## - region       3   204.905 788.44 276.64
     ## 
-    ## Step:  AIC=2544.72
-    ## crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + 
+    ## Step:  AIC=149.73
+    ## crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + 
     ##     region + pbeds_1000 + density_pop
     ## 
     ##               Df Sum of Sq    RSS    AIC
-    ## <none>                     135358 2544.7
-    ## - bagrad       1      1402 136760 2547.2
-    ## - hsgrad       1      1571 136929 2547.8
-    ## - pcincome     1      1834 137192 2548.6
-    ## - pop18        1      2389 137748 2550.4
-    ## - pop          1      3652 139010 2554.4
-    ## - pbeds_1000   1      7843 143201 2567.5
-    ## - poverty      1     10154 145512 2574.6
-    ## - density_pop  1     36580 171938 2648.0
-    ## - region       3     40192 175550 2653.1
+    ## <none>                     585.54 149.73
+    ## - hsgrad       1     4.640 590.18 151.21
+    ## - bagrad       1     7.070 592.61 153.01
+    ## - pcincome     1    15.076 600.61 158.92
+    ## - pop18        1    15.967 601.50 159.57
+    ## - pop          1    16.046 601.58 159.63
+    ## - pbeds_1000   1    39.273 624.81 176.30
+    ## - poverty      1    41.161 626.70 177.62
+    ## - density_pop  1    70.118 655.66 197.50
+    ## - region       3   209.818 795.36 278.49
 
 ``` r
 fit_back
@@ -641,30 +622,48 @@ fit_back
 
     ## 
     ## Call:
-    ## lm(formula = crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    ## lm(formula = crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty + 
     ##     pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
     ## 
     ## Coefficients:
     ##         (Intercept)                  pop                pop18  
-    ##          -6.700e+01            5.350e-06            7.817e-01  
+    ##          -1.132e+00            3.546e-07            6.390e-02  
     ##              hsgrad               bagrad              poverty  
-    ##           5.852e-01           -5.929e-01            2.039e+00  
+    ##           3.180e-02           -4.210e-02            1.298e-01  
     ##            pcincome  regionnorth central          regionsouth  
-    ##           1.109e-03            9.017e+00            2.703e+01  
+    ##           1.005e-04            6.887e-01            1.933e+00  
     ##          regionwest           pbeds_1000          density_pop  
-    ##           2.083e+01            2.497e+00            4.834e-03
+    ##           1.642e+00            1.767e-01            2.117e-04
 
-crm\_1000 \~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + region
-+ pbeds\_1000 + density\_pop, data = cdi\_model
+``` r
+olsrr::ols_plot_resid_fit(fit_back)
+```
+
+![](draft_yma_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+
+``` r
+olsrr::ols_plot_resid_qq(fit_back)
+```
+
+![](draft_yma_files/figure-gfm/unnamed-chunk-26-2.png)<!-- -->
+
+``` r
+MASS::boxcox(fit_back)
+```
+
+![](draft_yma_files/figure-gfm/unnamed-chunk-26-3.png)<!-- -->
+
+lm(formula = crm\_1000^0.5 \~ pop + pop18 + hsgrad + bagrad + poverty +
+pcincome + region + pbeds\_1000 + density\_pop, data = cdi\_model)
 
 #### forward
 
 ``` r
-fit_forward = step(full_fit, direction='forward')
+fit_forward = step(trans_fit, direction='forward')
 ```
 
-    ## Start:  AIC=2548.68
-    ## crm_1000 ~ pop + pop18 + pop65 + hsgrad + bagrad + poverty + 
+    ## Start:  AIC=153.85
+    ## crm_1000^0.5 ~ pop + pop18 + pop65 + hsgrad + bagrad + poverty + 
     ##     unemp + pcincome + region + pdocs_1000 + pbeds_1000 + density_pop
 
 ``` r
@@ -673,109 +672,127 @@ fit_forward
 
     ## 
     ## Call:
-    ## lm(formula = crm_1000 ~ pop + pop18 + pop65 + hsgrad + bagrad + 
+    ## lm(formula = crm_1000^0.5 ~ pop + pop18 + pop65 + hsgrad + bagrad + 
     ##     poverty + unemp + pcincome + region + pdocs_1000 + pbeds_1000 + 
     ##     density_pop, data = cdi_model)
     ## 
     ## Coefficients:
     ##         (Intercept)                  pop                pop18  
-    ##          -6.922e+01            5.486e-06            6.947e-01  
+    ##          -1.645e+00            3.624e-07            6.320e-02  
     ##               pop65               hsgrad               bagrad  
-    ##          -1.998e-01            6.143e-01           -4.835e-01  
+    ##          -3.609e-03            3.479e-02           -3.472e-02  
     ##             poverty                unemp             pcincome  
-    ##           1.856e+00            6.111e-01            1.039e-03  
+    ##           1.192e-01            4.305e-02            9.589e-05  
     ## regionnorth central          regionsouth           regionwest  
-    ##           8.978e+00            2.779e+01            2.118e+01  
+    ##           7.062e-01            1.996e+00            1.674e+00  
     ##          pdocs_1000           pbeds_1000          density_pop  
-    ##          -6.634e-01            3.157e+00            4.901e-03
+    ##          -3.845e-02            2.120e-01            2.150e-04
 
-crm\_1000 \~ pop + pop18 + pop65 + hsgrad + bagrad + poverty + unemp +
-pcincome + region + pdocs\_1000 + pbeds\_1000 + density\_pop, data =
-cdi\_model
+``` r
+olsrr::ols_plot_resid_fit(fit_forward)
+```
+
+![](draft_yma_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+
+``` r
+olsrr::ols_plot_resid_qq(fit_forward)
+```
+
+![](draft_yma_files/figure-gfm/unnamed-chunk-27-2.png)<!-- -->
+
+``` r
+MASS::boxcox(fit_forward)
+```
+
+![](draft_yma_files/figure-gfm/unnamed-chunk-27-3.png)<!-- -->
+
+lm(formula = crm\_1000^0.5 \~ pop + pop18 + pop65 + hsgrad + bagrad +
+poverty + unemp + pcincome + region + pdocs\_1000 + pbeds\_1000 +
+density\_pop, data = cdi\_model)
 
 #### both
 
 step-wise?
 
 ``` r
-fit_both = step(full_fit, direction='both')
+fit_both = step(trans_fit, direction='both')
 ```
 
-    ## Start:  AIC=2548.68
-    ## crm_1000 ~ pop + pop18 + pop65 + hsgrad + bagrad + poverty + 
+    ## Start:  AIC=153.85
+    ## crm_1000^0.5 ~ pop + pop18 + pop65 + hsgrad + bagrad + poverty + 
     ##     unemp + pcincome + region + pdocs_1000 + pbeds_1000 + density_pop
     ## 
     ##               Df Sum of Sq    RSS    AIC
-    ## - pdocs_1000   1       134 134867 2547.1
-    ## - pop65        1       136 134869 2547.1
-    ## - unemp        1       419 135152 2548.1
-    ## <none>                     134733 2548.7
-    ## - bagrad       1       840 135573 2549.4
-    ## - pop18        1      1401 136134 2551.2
-    ## - pcincome     1      1528 136261 2551.6
-    ## - hsgrad       1      1654 136387 2552.1
-    ## - pop          1      3825 138558 2559.0
-    ## - pbeds_1000   1      5013 139747 2562.8
-    ## - poverty      1      7313 142046 2569.9
-    ## - density_pop  1     36989 171723 2653.4
-    ## - region       3     39099 173832 2654.8
+    ## - pop65        1     0.044 583.09 151.89
+    ## - pdocs_1000   1     0.451 583.49 152.19
+    ## - unemp        1     2.081 585.12 153.42
+    ## <none>                     583.04 153.85
+    ## - bagrad       1     4.331 587.37 155.11
+    ## - hsgrad       1     5.303 588.35 155.84
+    ## - pop18        1    11.591 594.63 160.51
+    ## - pcincome     1    13.004 596.05 161.56
+    ## - pop          1    16.690 599.73 164.27
+    ## - pbeds_1000   1    22.604 605.65 168.59
+    ## - poverty      1    30.154 613.20 174.04
+    ## - density_pop  1    71.185 654.23 202.54
+    ## - region       3   205.212 788.25 280.54
     ## 
-    ## Step:  AIC=2547.12
-    ## crm_1000 ~ pop + pop18 + pop65 + hsgrad + bagrad + poverty + 
-    ##     unemp + pcincome + region + pbeds_1000 + density_pop
+    ## Step:  AIC=151.89
+    ## crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + 
+    ##     pcincome + region + pdocs_1000 + pbeds_1000 + density_pop
     ## 
     ##               Df Sum of Sq    RSS    AIC
-    ## - pop65        1       130 134998 2545.6
-    ## - unemp        1       410 135278 2546.5
-    ## <none>                     134867 2547.1
-    ## - bagrad       1      1080 135948 2548.6
-    ## + pdocs_1000   1       134 134733 2548.7
-    ## - pop18        1      1338 136206 2549.5
-    ## - pcincome     1      1438 136305 2549.8
-    ## - hsgrad       1      1744 136611 2550.8
-    ## - pop          1      3789 138656 2557.3
-    ## - poverty      1      7414 142281 2568.7
-    ## - pbeds_1000   1      7715 142583 2569.6
-    ## - density_pop  1     36918 171785 2651.6
-    ## - region       3     38974 173841 2652.8
+    ## - pdocs_1000   1     0.446 583.53 150.22
+    ## - unemp        1     2.038 585.12 151.42
+    ## <none>                     583.09 151.89
+    ## - bagrad       1     4.334 587.42 153.15
+    ## + pop65        1     0.044 583.04 153.85
+    ## - hsgrad       1     5.380 588.47 153.93
+    ## - pcincome     1    13.159 596.25 159.71
+    ## - pop18        1    16.404 599.49 162.09
+    ## - pop          1    16.651 599.74 162.28
+    ## - pbeds_1000   1    23.989 607.08 167.63
+    ## - poverty      1    31.904 614.99 173.33
+    ## - density_pop  1    71.276 654.36 200.63
+    ## - region       3   205.335 788.42 278.63
     ## 
-    ## Step:  AIC=2545.55
-    ## crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + 
+    ## Step:  AIC=150.22
+    ## crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + 
     ##     pcincome + region + pbeds_1000 + density_pop
     ## 
     ##               Df Sum of Sq    RSS    AIC
-    ## - unemp        1       360 135358 2544.7
-    ## <none>                     134998 2545.6
-    ## - bagrad       1      1079 136077 2547.1
-    ## + pop65        1       130 134867 2547.1
-    ## + pdocs_1000   1       129 134869 2547.1
-    ## - pcincome     1      1505 136503 2548.4
-    ## - hsgrad       1      1806 136804 2549.4
-    ## - pop18        1      2397 137395 2551.3
-    ## - pop          1      3746 138744 2555.6
-    ## - poverty      1      8138 143136 2569.3
-    ## - pbeds_1000   1      8151 143149 2569.3
-    ## - density_pop  1     36790 171787 2649.6
-    ## - region       3     39013 174011 2651.2
+    ## - unemp        1     2.006 585.54 149.73
+    ## <none>                     583.53 150.22
+    ## + pdocs_1000   1     0.446 583.09 151.89
+    ## + pop65        1     0.039 583.49 152.19
+    ## - bagrad       1     5.378 588.91 152.26
+    ## - hsgrad       1     5.671 589.20 152.48
+    ## - pcincome     1    12.753 596.29 157.74
+    ## - pop18        1    16.012 599.54 160.13
+    ## - pop          1    16.517 600.05 160.50
+    ## - poverty      1    32.264 615.80 171.90
+    ## - pbeds_1000   1    41.083 624.62 178.16
+    ## - density_pop  1    70.863 654.40 198.65
+    ## - region       3   204.905 788.44 276.64
     ## 
-    ## Step:  AIC=2544.72
-    ## crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + 
+    ## Step:  AIC=149.73
+    ## crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + 
     ##     region + pbeds_1000 + density_pop
     ## 
     ##               Df Sum of Sq    RSS    AIC
-    ## <none>                     135358 2544.7
-    ## + unemp        1       360 134998 2545.6
-    ## + pdocs_1000   1       122 135236 2546.3
-    ## + pop65        1        80 135278 2546.5
-    ## - bagrad       1      1402 136760 2547.2
-    ## - hsgrad       1      1571 136929 2547.8
-    ## - pcincome     1      1834 137192 2548.6
-    ## - pop18        1      2389 137748 2550.4
-    ## - pop          1      3652 139010 2554.4
-    ## - pbeds_1000   1      7843 143201 2567.5
-    ## - poverty      1     10154 145512 2574.6
-    ## - density_pop  1     36580 171938 2648.0
-    ## - region       3     40192 175550 2653.1
+    ## <none>                     585.54 149.73
+    ## + unemp        1     2.006 583.53 150.22
+    ## - hsgrad       1     4.640 590.18 151.21
+    ## + pdocs_1000   1     0.414 585.12 151.42
+    ## + pop65        1     0.000 585.54 151.73
+    ## - bagrad       1     7.070 592.61 153.01
+    ## - pcincome     1    15.076 600.61 158.92
+    ## - pop18        1    15.967 601.50 159.57
+    ## - pop          1    16.046 601.58 159.63
+    ## - pbeds_1000   1    39.273 624.81 176.30
+    ## - poverty      1    41.161 626.70 177.62
+    ## - density_pop  1    70.118 655.66 197.50
+    ## - region       3   209.818 795.36 278.49
 
 ``` r
 fit_both
@@ -783,25 +800,23 @@ fit_both
 
     ## 
     ## Call:
-    ## lm(formula = crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    ## lm(formula = crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty + 
     ##     pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
     ## 
     ## Coefficients:
     ##         (Intercept)                  pop                pop18  
-    ##          -6.700e+01            5.350e-06            7.817e-01  
+    ##          -1.132e+00            3.546e-07            6.390e-02  
     ##              hsgrad               bagrad              poverty  
-    ##           5.852e-01           -5.929e-01            2.039e+00  
+    ##           3.180e-02           -4.210e-02            1.298e-01  
     ##            pcincome  regionnorth central          regionsouth  
-    ##           1.109e-03            9.017e+00            2.703e+01  
+    ##           1.005e-04            6.887e-01            1.933e+00  
     ##          regionwest           pbeds_1000          density_pop  
-    ##           2.083e+01            2.497e+00            4.834e-03
+    ##           1.642e+00            1.767e-01            2.117e-04
 
-crm\_1000 \~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + region
-+ pbeds\_1000 + density\_pop, data = cdi\_model This gives back the same
-model as back
+lm(formula = crm\_1000^0.5 \~ pop + pop18 + hsgrad + bagrad + poverty +
+pcincome + region + pbeds\_1000 + density\_pop, data = cdi\_model)
 
-Some group forward again based on their first time step wise…not sure if
-we need to do that tho
+This gives back the same model as back
 
 ### Test based procedures
 
@@ -965,3 +980,153 @@ leaps(x = model.matrix(fit_forward)[,-1],
     ##                            0.574                            0.574 
     ##          1,3,4,6,7,9,10,11,13,14            1,2,6,8,9,10,11,13,14 
     ##                            0.573                            0.573
+
+## backward by hand
+
+``` r
+# No docs
+step1 = update(full_fit, . ~ . -pdocs_1000)
+summary(step1)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = crm_1000 ~ pop + pop18 + pop65 + hsgrad + bagrad + 
+    ##     poverty + unemp + pcincome + region + pbeds_1000 + density_pop, 
+    ##     data = cdi_model)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -47.985 -11.272  -0.703  10.132  76.056 
+    ## 
+    ## Coefficients:
+    ##                       Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)         -6.820e+01  2.732e+01  -2.496 0.012936 *  
+    ## pop                  5.458e-06  1.578e-06   3.459 0.000596 ***
+    ## pop18                6.767e-01  3.291e-01   2.056 0.040406 *  
+    ## pop65               -1.959e-01  3.052e-01  -0.642 0.521291    
+    ## hsgrad               6.287e-01  2.679e-01   2.347 0.019396 *  
+    ## bagrad              -5.314e-01  2.876e-01  -1.847 0.065392 .  
+    ## poverty              1.867e+00  3.857e-01   4.839 1.83e-06 ***
+    ## unemp                6.044e-01  5.309e-01   1.138 0.255634    
+    ## pcincome             1.000e-03  4.692e-04   2.131 0.033651 *  
+    ## regionnorth central  9.061e+00  2.727e+00   3.323 0.000969 ***
+    ## regionsouth          2.782e+01  2.657e+00  10.471  < 2e-16 ***
+    ## regionwest           2.088e+01  3.088e+00   6.760 4.55e-11 ***
+    ## pbeds_1000           2.795e+00  5.663e-01   4.937 1.14e-06 ***
+    ## density_pop          4.871e-03  4.510e-04  10.799  < 2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 17.79 on 426 degrees of freedom
+    ## Multiple R-squared:  0.5886, Adjusted R-squared:  0.5761 
+    ## F-statistic: 46.89 on 13 and 426 DF,  p-value: < 2.2e-16
+
+``` r
+# No pop65
+step2 = update(step1, . ~ . -pop65)
+summary(step2)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    ##     unemp + pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -47.962 -11.179  -0.733   9.945  76.658 
+    ## 
+    ## Coefficients:
+    ##                       Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)         -7.455e+01  2.546e+01  -2.928 0.003589 ** 
+    ## pop                  5.424e-06  1.576e-06   3.442 0.000634 ***
+    ## pop18                7.829e-01  2.843e-01   2.753 0.006150 ** 
+    ## hsgrad               6.387e-01  2.672e-01   2.390 0.017287 *  
+    ## bagrad              -5.311e-01  2.874e-01  -1.848 0.065331 .  
+    ## poverty              1.916e+00  3.777e-01   5.073 5.84e-07 ***
+    ## unemp                5.619e-01  5.264e-01   1.067 0.286401    
+    ## pcincome             1.021e-03  4.678e-04   2.182 0.029685 *  
+    ## regionnorth central  9.392e+00  2.676e+00   3.509 0.000497 ***
+    ## regionsouth          2.791e+01  2.651e+00  10.526  < 2e-16 ***
+    ## regionwest           2.106e+01  3.072e+00   6.856 2.49e-11 ***
+    ## pbeds_1000           2.657e+00  5.233e-01   5.077 5.72e-07 ***
+    ## density_pop          4.851e-03  4.497e-04  10.787  < 2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 17.78 on 427 degrees of freedom
+    ## Multiple R-squared:  0.5882, Adjusted R-squared:  0.5767 
+    ## F-statistic: 50.83 on 12 and 427 DF,  p-value: < 2.2e-16
+
+``` r
+# No unemp
+step3 = update(step2, . ~ . -unemp)
+summary(step3)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    ##     pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -48.679 -10.886  -0.826   9.973  76.374 
+    ## 
+    ## Coefficients:
+    ##                       Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)         -6.700e+01  2.446e+01  -2.739 0.006413 ** 
+    ## pop                  5.350e-06  1.574e-06   3.398 0.000742 ***
+    ## pop18                7.817e-01  2.844e-01   2.749 0.006236 ** 
+    ## hsgrad               5.852e-01  2.626e-01   2.229 0.026334 *  
+    ## bagrad              -5.929e-01  2.816e-01  -2.106 0.035819 *  
+    ## poverty              2.039e+00  3.598e-01   5.666 2.68e-08 ***
+    ## pcincome             1.109e-03  4.605e-04   2.408 0.016467 *  
+    ## regionnorth central  9.017e+00  2.653e+00   3.398 0.000742 ***
+    ## regionsouth          2.703e+01  2.520e+00  10.726  < 2e-16 ***
+    ## regionwest           2.083e+01  3.065e+00   6.797 3.61e-11 ***
+    ## pbeds_1000           2.497e+00  5.014e-01   4.980 9.25e-07 ***
+    ## density_pop          4.834e-03  4.495e-04  10.755  < 2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 17.78 on 428 degrees of freedom
+    ## Multiple R-squared:  0.5871, Adjusted R-squared:  0.5765 
+    ## F-statistic: 55.33 on 11 and 428 DF,  p-value: < 2.2e-16
+
+``` r
+mult.fit.final = lm(formula = crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
+summary(mult.fit.final)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    ##     pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -48.679 -10.886  -0.826   9.973  76.374 
+    ## 
+    ## Coefficients:
+    ##                       Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)         -6.700e+01  2.446e+01  -2.739 0.006413 ** 
+    ## pop                  5.350e-06  1.574e-06   3.398 0.000742 ***
+    ## pop18                7.817e-01  2.844e-01   2.749 0.006236 ** 
+    ## hsgrad               5.852e-01  2.626e-01   2.229 0.026334 *  
+    ## bagrad              -5.929e-01  2.816e-01  -2.106 0.035819 *  
+    ## poverty              2.039e+00  3.598e-01   5.666 2.68e-08 ***
+    ## pcincome             1.109e-03  4.605e-04   2.408 0.016467 *  
+    ## regionnorth central  9.017e+00  2.653e+00   3.398 0.000742 ***
+    ## regionsouth          2.703e+01  2.520e+00  10.726  < 2e-16 ***
+    ## regionwest           2.083e+01  3.065e+00   6.797 3.61e-11 ***
+    ## pbeds_1000           2.497e+00  5.014e-01   4.980 9.25e-07 ***
+    ## density_pop          4.834e-03  4.495e-04  10.755  < 2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 17.78 on 428 degrees of freedom
+    ## Multiple R-squared:  0.5871, Adjusted R-squared:  0.5765 
+    ## F-statistic: 55.33 on 11 and 428 DF,  p-value: < 2.2e-16
