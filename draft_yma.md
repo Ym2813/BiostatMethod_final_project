@@ -87,7 +87,7 @@ boxplot(cdi$pcincome, main = "pcincome")
 boxplot(cdi$totalinc, main = "totalinc")
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/boxplot-1.png)<!-- -->
 
 ### Correlation
 
@@ -142,7 +142,7 @@ ggstatsplot::ggcorrmat(
 )
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 -   Here is the correlation with pairs function. More specific than the
     heat map above. We can observe the correlation between all the terms
@@ -152,7 +152,7 @@ ggstatsplot::ggcorrmat(
 pairs(crm_1000 ~.,data=cdi_descriptive, panel = panel.smooth, upper.panel = NULL, main = "Scatterplot Matrix")
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 #### Marginal distribution ?
 
@@ -169,7 +169,7 @@ ggMarginal(marg_den, type = "histogram", fill="transparent")
     ## `geom_smooth()` using formula 'y ~ x'
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
 marg_area = cdi %>% ggplot(aes(x = area, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
@@ -179,7 +179,7 @@ ggMarginal(marg_area, type = "histogram", fill="transparent")
     ## `geom_smooth()` using formula 'y ~ x'
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 marg_pop = cdi %>% ggplot(aes(x = pop, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
@@ -189,7 +189,7 @@ ggMarginal(marg_pop, type = "histogram", fill="transparent")
     ## `geom_smooth()` using formula 'y ~ x'
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 marg_pop18 = cdi %>% ggplot(aes(x = pop18, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
@@ -200,7 +200,7 @@ ggMarginal(marg_pop18, type = "histogram", fill="transparent")
     ## `geom_smooth()` using formula 'y ~ x'
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 marg_pop65 = cdi %>% ggplot(aes(x = pop65, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
@@ -210,7 +210,7 @@ ggMarginal(marg_pop65, type = "histogram", fill="transparent")
     ## `geom_smooth()` using formula 'y ~ x'
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 marg_pdocs_1000 = cdi %>% ggplot(aes(x = pdocs_1000, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
@@ -220,7 +220,7 @@ ggMarginal(marg_pdocs_1000, type = "histogram", fill="transparent")
     ## `geom_smooth()` using formula 'y ~ x'
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 marg_pbeds_1000 = cdi %>% ggplot(aes(x = pbeds_1000, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
@@ -230,7 +230,7 @@ ggMarginal(marg_pbeds_1000, type = "histogram", fill="transparent")
     ## `geom_smooth()` using formula 'y ~ x'
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 marg_hsgrad = cdi %>% ggplot(aes(x = hsgrad, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') #negative correlation
@@ -240,7 +240,7 @@ ggMarginal(marg_hsgrad, type = "histogram", fill="transparent")
     ## `geom_smooth()` using formula 'y ~ x'
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 marg_bagrad = cdi %>% ggplot(aes(x = bagrad, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
@@ -250,7 +250,7 @@ ggMarginal(marg_bagrad, type = "histogram", fill="transparent")
     ## `geom_smooth()` using formula 'y ~ x'
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 marg_poverty = cdi %>% ggplot(aes(x = poverty, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') # positive correlation
@@ -260,7 +260,7 @@ ggMarginal(marg_poverty, type = "histogram", fill="transparent")
     ## `geom_smooth()` using formula 'y ~ x'
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
 marg_unemp = cdi %>% ggplot(aes(x = unemp, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
@@ -270,7 +270,7 @@ ggMarginal(marg_unemp, type = "histogram", fill="transparent")
     ## `geom_smooth()` using formula 'y ~ x'
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 marg_pcincome = cdi %>% ggplot(aes(x = pcincome, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
@@ -280,7 +280,7 @@ ggMarginal(marg_pcincome, type = "histogram", fill="transparent")
     ## `geom_smooth()` using formula 'y ~ x'
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 marg_totalinc = cdi %>% ggplot(aes(x = totalinc, y = crm_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
@@ -290,7 +290,7 @@ ggMarginal(marg_totalinc, type = "histogram", fill="transparent")
     ## `geom_smooth()` using formula 'y ~ x'
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ### Distribution of outcome
 
@@ -302,7 +302,7 @@ cdi %>%
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 do we look at the distribution of outcome like this and transform them
 here? check again
@@ -358,19 +358,16 @@ cdi_by_state %>%
 boxplot(cdi_by_state$state_CRM_1000, main = 'State Crime Rate per 1000 people')
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 **we probably need to plot region as well? not sure**
 
 ## Model!
 
 **Q: do we need more descriptive analysis, visualization? rate of crime
-for each state?** **there’s a few duplicated cty, but different area,
-maybe diff place then? not sure** they can’t be the same… otherwise we
-have to recalculate some stuff… duplicated(cdi\[,2:3\]) cdi %&gt;%
-filter(cty == “Baltimor”) cdi %&gt;% filter(cty == “St.\_Loui”)
+for each state?**
 
-#### Full model predictors ok?
+#### Full model predictors
 
 this model used `northeast` as the reference level for region
 
@@ -418,13 +415,13 @@ summary(full_fit)
 olsrr::ols_plot_resid_qq(full_fit)
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
 ``` r
 olsrr::ols_plot_resid_fit(full_fit)
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-23-2.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-22-2.png)<!-- -->
 
 ## Transformation
 
@@ -432,7 +429,7 @@ olsrr::ols_plot_resid_fit(full_fit)
 lambda = MASS::boxcox(full_fit)
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
 ``` r
 optlam = lambda$x[which.max(lambda$y)]
@@ -442,7 +439,7 @@ optlam
     ## [1] 0.5454545
 
 The lambda from the transformation is 0.5454, so we will try to fit a
-square root transformation to y
+square root transformation to Y
 
 ``` r
 trans_fit = lm(crm_1000^0.5 ~ .,data = cdi_model)
@@ -485,19 +482,19 @@ summary(trans_fit)
 olsrr::ols_plot_resid_fit(trans_fit)
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 ``` r
 olsrr::ols_plot_resid_qq(trans_fit)
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-25-2.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-24-2.png)<!-- -->
 
 ``` r
 lambda_trans = MASS::boxcox(trans_fit)
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-25-3.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-24-3.png)<!-- -->
 
 ``` r
 optlam_trans = lambda_trans$x[which.max(lambda_trans$y)]
@@ -539,6 +536,10 @@ lambda_trans
     ##  [85] -537.8262 -538.6770 -539.6386 -540.7108 -541.8934 -543.1864 -544.5897
     ##  [92] -546.1033 -547.7274 -549.4619 -551.3070 -553.2628 -555.3295 -557.5075
     ##  [99] -559.7968 -562.1978
+
+``` r
+cdi_trans = cdi_model %>% mutate(crm_1000_sqr = crm_1000^0.5) %>% select(-c(crm_1000))
+```
 
 #### Backward
 
@@ -639,19 +640,19 @@ fit_back
 olsrr::ols_plot_resid_fit(fit_back)
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
 
 ``` r
 olsrr::ols_plot_resid_qq(fit_back)
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-26-2.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-25-2.png)<!-- -->
 
 ``` r
 MASS::boxcox(fit_back)
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-26-3.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-25-3.png)<!-- -->
 
 lm(formula = crm\_1000^0.5 \~ pop + pop18 + hsgrad + bagrad + poverty +
 pcincome + region + pbeds\_1000 + density\_pop, data = cdi\_model)
@@ -692,19 +693,19 @@ fit_forward
 olsrr::ols_plot_resid_fit(fit_forward)
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
 ``` r
 olsrr::ols_plot_resid_qq(fit_forward)
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-27-2.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-26-2.png)<!-- -->
 
 ``` r
 MASS::boxcox(fit_forward)
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-27-3.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-26-3.png)<!-- -->
 
 lm(formula = crm\_1000^0.5 \~ pop + pop18 + pop65 + hsgrad + bagrad +
 poverty + unemp + pcincome + region + pdocs\_1000 + pbeds\_1000 +
@@ -818,66 +819,165 @@ pcincome + region + pbeds\_1000 + density\_pop, data = cdi\_model)
 
 This gives back the same model as back
 
-### Test based procedures
+### Criterion
 
 #### Cp
 
-I didn’t include the full model here
-
-**backward & both**
-
 ``` r
-# printing the 2 best models of each size. For example, the first two lines: print the best 2 models that have 2 variables (including intercept)
-library(leaps)
-Cp_b = leaps(x = model.matrix(fit_back)[,-1],
-      y = cdi_model$crm_1000,
-      nbest = 2,
-      method = "Cp")
-Cp_b
+olsrr::ols_mallows_cp(fit_back,trans_fit)
 ```
 
-    ## $which
-    ##        1     2     3     4     5     6     7     8     9     A     B
-    ## 1  FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-    ## 1  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE
-    ## 2  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE
-    ## 2  FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE
-    ## 3  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE
-    ## 3  FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE
-    ## 4  FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 4  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE FALSE  TRUE
-    ## 5  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 5  FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE FALSE  TRUE
-    ## 6  FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 6   TRUE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 7   TRUE FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 7   TRUE FALSE  TRUE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 8   TRUE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 8   TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 9   TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 9   TRUE  TRUE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 10  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 10  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 11  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 
-    ## $label
-    ##  [1] "(Intercept)" "1"           "2"           "3"           "4"          
-    ##  [6] "5"           "6"           "7"           "8"           "9"          
-    ## [11] "A"           "B"          
-    ## 
-    ## $size
-    ##  [1]  2  2  3  3  4  4  5  5  6  6  7  7  8  8  9  9 10 10 11 11 12
-    ## 
-    ## $Cp
-    ##  [1] 361.37662 369.85075 185.35978 217.86627 115.16570 160.73877  83.84967
-    ##  [8]  84.08696  49.18224  63.36721  33.69922  34.29891  19.17558  24.91300
-    ## [15]  14.72619  14.79923  13.80739  14.07314  14.43365  14.96836  12.00000
+    ## [1] 6.819036
 
 ``` r
-Cp_b %>% faraway::Cpplot()
+olsrr::ols_mallows_cp(fit_forward,trans_fit)
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+    ## [1] 11
+
+``` r
+olsrr::ols_mallows_cp(fit_both,trans_fit)
+```
+
+    ## [1] 6.819036
+
+#### Adj R2
+
+``` r
+summary(fit_back) # 0.5469
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    ##     pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -4.1030 -0.7127  0.0509  0.7647  4.0519 
+    ## 
+    ## Coefficients:
+    ##                       Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)         -1.132e+00  1.609e+00  -0.704 0.481943    
+    ## pop                  3.546e-07  1.036e-07   3.425 0.000675 ***
+    ## pop18                6.390e-02  1.870e-02   3.416 0.000695 ***
+    ## hsgrad               3.180e-02  1.727e-02   1.842 0.066215 .  
+    ## bagrad              -4.210e-02  1.852e-02  -2.273 0.023503 *  
+    ## poverty              1.298e-01  2.367e-02   5.485 7.08e-08 ***
+    ## pcincome             1.005e-04  3.029e-05   3.320 0.000979 ***
+    ## regionnorth central  6.887e-01  1.745e-01   3.946 9.27e-05 ***
+    ## regionsouth          1.933e+00  1.657e-01  11.667  < 2e-16 ***
+    ## regionwest           1.642e+00  2.016e-01   8.145 4.19e-15 ***
+    ## pbeds_1000           1.767e-01  3.298e-02   5.358 1.38e-07 ***
+    ## density_pop          2.117e-04  2.957e-05   7.159 3.56e-12 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 1.17 on 428 degrees of freedom
+    ## Multiple R-squared:  0.5583, Adjusted R-squared:  0.5469 
+    ## F-statistic: 49.18 on 11 and 428 DF,  p-value: < 2.2e-16
+
+``` r
+summary(fit_forward) #0.5457
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = crm_1000^0.5 ~ pop + pop18 + pop65 + hsgrad + bagrad + 
+    ##     poverty + unemp + pcincome + region + pdocs_1000 + pbeds_1000 + 
+    ##     density_pop, data = cdi_model)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -4.0410 -0.7300  0.0708  0.7485  4.0273 
+    ## 
+    ## Coefficients:
+    ##                       Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)         -1.645e+00  1.802e+00  -0.913 0.361766    
+    ## pop                  3.624e-07  1.039e-07   3.488 0.000537 ***
+    ## pop18                6.320e-02  2.174e-02   2.907 0.003844 ** 
+    ## pop65               -3.609e-03  2.009e-02  -0.180 0.857548    
+    ## hsgrad               3.479e-02  1.769e-02   1.966 0.049933 *  
+    ## bagrad              -3.472e-02  1.954e-02  -1.777 0.076307 .  
+    ## poverty              1.192e-01  2.542e-02   4.688 3.72e-06 ***
+    ## unemp                4.305e-02  3.496e-02   1.232 0.218783    
+    ## pcincome             9.589e-05  3.114e-05   3.079 0.002213 ** 
+    ## regionnorth central  7.062e-01  1.797e-01   3.929 9.94e-05 ***
+    ## regionsouth          1.996e+00  1.749e-01  11.413  < 2e-16 ***
+    ## regionwest           1.674e+00  2.056e-01   8.142 4.37e-15 ***
+    ## pdocs_1000          -3.845e-02  6.706e-02  -0.573 0.566744    
+    ## pbeds_1000           2.120e-01  5.223e-02   4.059 5.86e-05 ***
+    ## density_pop          2.150e-04  2.984e-05   7.203 2.69e-12 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 1.171 on 425 degrees of freedom
+    ## Multiple R-squared:  0.5602, Adjusted R-squared:  0.5457 
+    ## F-statistic: 38.66 on 14 and 425 DF,  p-value: < 2.2e-16
+
+``` r
+summary(fit_both) #5469
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    ##     pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -4.1030 -0.7127  0.0509  0.7647  4.0519 
+    ## 
+    ## Coefficients:
+    ##                       Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)         -1.132e+00  1.609e+00  -0.704 0.481943    
+    ## pop                  3.546e-07  1.036e-07   3.425 0.000675 ***
+    ## pop18                6.390e-02  1.870e-02   3.416 0.000695 ***
+    ## hsgrad               3.180e-02  1.727e-02   1.842 0.066215 .  
+    ## bagrad              -4.210e-02  1.852e-02  -2.273 0.023503 *  
+    ## poverty              1.298e-01  2.367e-02   5.485 7.08e-08 ***
+    ## pcincome             1.005e-04  3.029e-05   3.320 0.000979 ***
+    ## regionnorth central  6.887e-01  1.745e-01   3.946 9.27e-05 ***
+    ## regionsouth          1.933e+00  1.657e-01  11.667  < 2e-16 ***
+    ## regionwest           1.642e+00  2.016e-01   8.145 4.19e-15 ***
+    ## pbeds_1000           1.767e-01  3.298e-02   5.358 1.38e-07 ***
+    ## density_pop          2.117e-04  2.957e-05   7.159 3.56e-12 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 1.17 on 428 degrees of freedom
+    ## Multiple R-squared:  0.5583, Adjusted R-squared:  0.5469 
+    ## F-statistic: 49.18 on 11 and 428 DF,  p-value: < 2.2e-16
+
+### BIC
+
+``` r
+library(flexmix)
+```
+
+    ## Loading required package: lattice
+
+``` r
+BIC(fit_back)
+```
+
+    ## [1] 1453.527
+
+``` r
+BIC(fit_forward)
+```
+
+    ## [1] 1469.908
+
+``` r
+BIC(fit_both)
+```
+
+    ## [1] 1453.527
+
+## Cp
+
+didn’t use any of this!
 
 size is the number of parameters in the model, Cp is Cp
 
@@ -886,100 +986,13 @@ number of parameters it included. in this case, the 1st to the last.
 
 **forward**
 
-``` r
-leaps(x = model.matrix(fit_forward)[,-1],
-      y = cdi_model$crm_1000,
-      nbest = 2,
-      method = "Cp") %>% faraway::Cpplot()
-```
-
-![](draft_yma_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
-
 So, multiple model satisfies the Cp criteria here.
 
 #### Adj R2
 
-**backward**
-
-``` r
-adjr_b = leaps(x = model.matrix(fit_back)[,-1],
-      y = cdi_model$crm_1000,
-      nbest = 2,
-      method = "adjr2") 
-
-adjr_b
-```
-
-    ## $which
-    ##        1     2     3     4     5     6     7     8     9     A     B
-    ## 1  FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-    ## 1  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE
-    ## 2  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE
-    ## 2  FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE
-    ## 3  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE
-    ## 3  FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE
-    ## 4  FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 4  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE FALSE  TRUE
-    ## 5  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 5  FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE FALSE  TRUE
-    ## 6  FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 6   TRUE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 7   TRUE FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 7   TRUE FALSE  TRUE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 8   TRUE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 8   TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 9   TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 9   TRUE  TRUE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 10  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 10  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 11  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 
-    ## $label
-    ##  [1] "(Intercept)" "1"           "2"           "3"           "4"          
-    ##  [6] "5"           "6"           "7"           "8"           "9"          
-    ## [11] "A"           "B"          
-    ## 
-    ## $size
-    ##  [1]  2  2  3  3  4  4  5  5  6  6  7  7  8  8  9  9 10 10 11 11 12
-    ## 
-    ## $adjr2
-    ##  [1] 0.2290554 0.2208622 0.3998009 0.3683000 0.4685454 0.4242809 0.4997575
-    ##  [8] 0.4995265 0.5343835 0.5205424 0.5504069 0.5498204 0.5655639 0.5599397
-    ## [15] 0.5708928 0.5708211 0.5727695 0.5725077 0.5731297 0.5726018 0.5765191
-
-``` r
-adjr_b%>% 
-  faraway::maxadjr(10)
-```
-
-    ## 1,2,3,4,5,6,7,8,9,10,11   1,2,3,5,6,7,8,9,10,11     1,2,5,6,7,8,9,10,11 
-    ##                   0.577                   0.573                   0.573 
-    ##   1,2,4,5,6,7,8,9,10,11     1,2,3,5,7,8,9,10,11       1,2,5,7,8,9,10,11 
-    ##                   0.573                   0.573                   0.571 
-    ##       1,3,5,7,8,9,10,11         1,5,7,8,9,10,11         1,3,5,8,9,10,11 
-    ##                   0.571                   0.566                   0.560 
-    ##           5,7,8,9,10,11 
-    ##                   0.550
+Did not use!! **backward**
 
 **forward**
-
-``` r
-leaps(x = model.matrix(fit_forward)[,-1],
-      y = cdi_model$crm_1000,
-      nbest = 2,
-      method = "adjr2") %>% faraway::maxadjr(10)
-```
-
-    ##      1,2,4,5,6,7,8,9,10,11,13,14        1,2,4,5,6,8,9,10,11,13,14 
-    ##                            0.577                            0.577 
-    ##    1,2,3,4,5,6,7,8,9,10,11,13,14   1,2,4,5,6,7,8,9,10,11,12,13,14 
-    ##                            0.576                            0.576 
-    ##     1,2,4,5,6,8,9,10,11,12,13,14 1,2,3,4,5,6,7,8,9,10,11,12,13,14 
-    ##                            0.576                            0.575 
-    ##        1,2,4,6,7,8,9,10,11,13,14          1,2,4,6,7,9,10,11,13,14 
-    ##                            0.574                            0.574 
-    ##          1,3,4,6,7,9,10,11,13,14            1,2,6,8,9,10,11,13,14 
-    ##                            0.573                            0.573
 
 ## backward by hand
 

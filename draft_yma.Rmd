@@ -54,7 +54,7 @@ Q: 1. do we need to group them by state or county? group by gounty gives 5000+ r
 
 We can use the box plot/ or histogram to check for normality. But I forgot when do we need normality...isn't it for residual??
 
-```{r}
+```{r boxplot}
 par(mfrow = c(2,7))
 
 boxplot(cdi$density_pop, main = "density_pop")
@@ -233,14 +233,9 @@ boxplot(cdi_by_state$state_CRM_1000, main = 'State Crime Rate per 1000 people')
 ## Model! 
 
 **Q: do we need more descriptive analysis, visualization? rate of crime for each state?**
-**there's a few duplicated cty, but different area, maybe diff place then? not sure**
-they can't be the same... otherwise we have to recalculate some stuff...
-duplicated(cdi[,2:3])
-cdi %>% filter(cty == "Baltimor")
-cdi %>% filter(cty == "St._Loui")
 
 
-#### Full model predictors ok?
+#### Full model predictors
 
 this model used `northeast` as the reference level for region 
 
@@ -263,7 +258,7 @@ optlam = lambda$x[which.max(lambda$y)]
 optlam
 ```
 
-The lambda from the transformation is 0.5454, so we will try to fit a square root transformation to y
+The lambda from the transformation is 0.5454, so we will try to fit a square root transformation to Y
 
 ```{r}
 trans_fit = lm(crm_1000^0.5 ~ .,data = cdi_model)
@@ -275,6 +270,8 @@ olsrr::ols_plot_resid_qq(trans_fit)
 lambda_trans = MASS::boxcox(trans_fit)
 optlam_trans = lambda_trans$x[which.max(lambda_trans$y)]
 lambda_trans
+
+cdi_trans = cdi_model %>% mutate(crm_1000_sqr = crm_1000^0.5) %>% select(-c(crm_1000))
 ```
 
 
@@ -320,24 +317,46 @@ lm(formula = crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty +
 
 This gives back the same model as back 
   
-### Test based procedures 
+### Criterion
 
 #### Cp
 
-I didn't include the full model here
+```{r}
+olsrr::ols_mallows_cp(fit_back,trans_fit)
+olsrr::ols_mallows_cp(fit_forward,trans_fit)
+olsrr::ols_mallows_cp(fit_both,trans_fit)
+```
 
-**backward & both**
+#### Adj R2
 
 ```{r}
+summary(fit_back) # 0.5469
+summary(fit_forward) #0.5457
+summary(fit_both) #5469
+```
+
+### BIC
+
+```{r}
+library(flexmix)
+BIC(fit_back)
+BIC(fit_forward)
+BIC(fit_both)
+```
+
+
+## Cp
+
+didn't use any of this!
+```{r, include=FALSE}
 # printing the 2 best models of each size. For example, the first two lines: print the best 2 models that have 2 variables (including intercept)
 library(leaps)
-Cp_b = leaps(x = model.matrix(fit_back)[,-1],
-      y = cdi_model$crm_1000,
+Cp_b = leaps(x = model.matrix(trans_fit)[,-1],
+      y = cdi_trans$crm_1000_sqr,
       nbest = 2,
       method = "Cp")
-Cp_b
 
-Cp_b %>% faraway::Cpplot()
+mod_b = Cp_b$Cp[which(Cp_b$Cp <= Cp_b$size)]
 ```
 
 size is the number of parameters in the model, Cp is Cp
@@ -346,21 +365,24 @@ The plot shows the model that satisfy the criteria, number indicates the number 
 
 
 **forward**
-```{r}
-leaps(x = model.matrix(fit_forward)[,-1],
-      y = cdi_model$crm_1000,
+```{r, include=FALSE}
+Cp_f = leaps(x = model.matrix(fit_forward)[,-1],
+      y = cdi_trans$crm_1000_sqr,
       nbest = 2,
-      method = "Cp") %>% faraway::Cpplot()
+      method = "Cp")
+
+mod_f = Cp_f$Cp[which(Cp_f$Cp <= Cp_f$size)]
 ```
 
 So, multiple model satisfies the Cp criteria here. 
 
 #### Adj R2
 
+Did not use!!
 **backward**
-```{r}
+```{r, include=FALSE}
 adjr_b = leaps(x = model.matrix(fit_back)[,-1],
-      y = cdi_model$crm_1000,
+      y = cdi_trans$crm_1000_sqr,
       nbest = 2,
       method = "adjr2") 
 
@@ -369,12 +391,10 @@ adjr_b
 adjr_b%>% 
   faraway::maxadjr(10)
 ```
-
-
 **forward**
-```{r}
+```{r, include=FALSE}
 leaps(x = model.matrix(fit_forward)[,-1],
-      y = cdi_model$crm_1000,
+      y = cdi_trans$crm_1000_sqr,
       nbest = 2,
       method = "adjr2") %>% faraway::maxadjr(10)
 ```
