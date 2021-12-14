@@ -43,10 +43,6 @@ skimr::skim(cdi_descriptive) %>%
   knitr::kable(
     col.names = c("variable", "n_missing", "mean","sd","min","Q25","median","Q75","max","histogram"),
     caption = "Global Summary", digits = 4)
-
-ggplot(gather(cdi_descriptive), aes(value)) + 
-    geom_histogram(bins = 13) + 
-    facet_wrap(~key, scales = 'free_x')
 ```
 
 Q: 1. do we need to group them by state or county? group by gounty gives 5000+ rows though...
@@ -59,9 +55,9 @@ Q: 1. do we need to group them by state or county? group by gounty gives 5000+ r
 We can use the box plot/ or histogram to check for normality. But I forgot when do we need normality...isn't it for residual??
 
 ```{r}
-par(mfrow = c(3,5))
+par(mfrow = c(2,7))
 
-boxplot(cdi$density_pop,  main = "density_pop")
+boxplot(cdi$density_pop, main = "density_pop")
 boxplot(cdi$area, main = "area")
 
 boxplot(cdi$pop, main = "pop")
@@ -190,13 +186,6 @@ ggMarginal(marg_totalinc, type = "histogram", fill="transparent")
 cdi %>% 
   ggplot(aes(x = crm_1000)) +
   geom_histogram()
-
-# log transfor the outcome
-cdi %>% 
-  ggplot(aes(x = log(crm_1000))) +
-  geom_histogram()
-
-
 ```
 
 do we look at the distribution of outcome like this and transform them here? check again
@@ -294,17 +283,30 @@ lambda_trans
 ```{r}
 fit_back = step(trans_fit, direction='backward')
 fit_back
+
+olsrr::ols_plot_resid_fit(fit_back)
+olsrr::ols_plot_resid_qq(fit_back)
+MASS::boxcox(fit_back)
 ```
 
+lm(formula = crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
 
 #### forward 
 
 ```{r}
 fit_forward = step(trans_fit, direction='forward')
 fit_forward
+
+olsrr::ols_plot_resid_fit(fit_forward)
+olsrr::ols_plot_resid_qq(fit_forward)
+MASS::boxcox(fit_forward)
 ```
 
-    
+lm(formula = crm_1000^0.5 ~ pop + pop18 + pop65 + hsgrad + bagrad + 
+    poverty + unemp + pcincome + region + pdocs_1000 + pbeds_1000 + 
+    density_pop, data = cdi_model)
+
 #### both
 
 step-wise?
@@ -313,13 +315,11 @@ step-wise?
 fit_both = step(trans_fit, direction='both')
 fit_both
 ```
+lm(formula = crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
 
-crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + 
-    pcincome + region + pbeds_1000 + density_pop, data = cdi_model
 This gives back the same model as back 
-    
-Some group forward again based on their first time step wise...not sure if we need to do that tho
-
+  
 ### Test based procedures 
 
 #### Cp
