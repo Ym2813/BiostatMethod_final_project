@@ -55,6 +55,14 @@ skimr::skim(cdi_descriptive) %>%
 
 Global Summary
 
+``` r
+ggplot(gather(cdi_descriptive), aes(value)) + 
+    geom_histogram(bins = 13) + 
+    facet_wrap(~key, scales = 'free_x')
+```
+
+![](draft_yma_files/figure-gfm/statistic%20summary-1.png)<!-- -->
+
 Q: 1. do we need to group them by state or county? group by gounty gives
 5000+ rows though… 2. do we need box plot still? 3. again, transfer some
 variables to “per pop” / “per 1000 pop” ?
@@ -136,7 +144,7 @@ library(ggstatsplot)
 
 ``` r
 ggstatsplot::ggcorrmat(
-  data = cdi,
+  data = cdi_descriptive,
   type = "parametric", # parametric for Pearson, nonparametric for Spearman's correlation
   colors = c("darkred", "white", "steelblue") # change default colors
 )
@@ -383,13 +391,6 @@ filter(cty == “Baltimor”) cdi %&gt;% filter(cty == “St.\_Loui”)
 
 #### Full model predictors ok?
 
-included pop in addition to pop18, pop65. Do we need pop tho? Would
-pop18 and pop65 be enough already?
-
-did not include cty, state, area, crimes, totalinc, totalinc (included
-pcincome), do we need to include any of those? for example, both
-totalinc and pcincome, area and pop\_den
-
 this model used `northeast` as the reference level for region
 
 ``` r
@@ -431,6 +432,132 @@ summary(full_fit)
     ## Residual standard error: 17.81 on 425 degrees of freedom
     ## Multiple R-squared:  0.589,  Adjusted R-squared:  0.5755 
     ## F-statistic: 43.51 on 14 and 425 DF,  p-value: < 2.2e-16
+
+``` r
+olsrr::ols_plot_resid_qq(full_fit)
+```
+
+![](draft_yma_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+
+``` r
+olsrr::ols_plot_resid_fit(full_fit)
+```
+
+![](draft_yma_files/figure-gfm/unnamed-chunk-23-2.png)<!-- -->
+
+## Transformation
+
+``` r
+lambda = MASS::boxcox(full_fit)
+```
+
+![](draft_yma_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+
+``` r
+optlam = lambda$x[which.max(lambda$y)]
+optlam
+```
+
+    ## [1] 0.5454545
+
+The lambda from the transformation is 0.5454, so we will try to fit a
+square root transformation to y
+
+``` r
+trans_fit = lm(crm_1000^0.5 ~ .,data = cdi_model)
+summary(trans_fit)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = crm_1000^0.5 ~ ., data = cdi_model)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -4.0410 -0.7300  0.0708  0.7485  4.0273 
+    ## 
+    ## Coefficients:
+    ##                       Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)         -1.645e+00  1.802e+00  -0.913 0.361766    
+    ## pop                  3.624e-07  1.039e-07   3.488 0.000537 ***
+    ## pop18                6.320e-02  2.174e-02   2.907 0.003844 ** 
+    ## pop65               -3.609e-03  2.009e-02  -0.180 0.857548    
+    ## hsgrad               3.479e-02  1.769e-02   1.966 0.049933 *  
+    ## bagrad              -3.472e-02  1.954e-02  -1.777 0.076307 .  
+    ## poverty              1.192e-01  2.542e-02   4.688 3.72e-06 ***
+    ## unemp                4.305e-02  3.496e-02   1.232 0.218783    
+    ## pcincome             9.589e-05  3.114e-05   3.079 0.002213 ** 
+    ## regionnorth central  7.062e-01  1.797e-01   3.929 9.94e-05 ***
+    ## regionsouth          1.996e+00  1.749e-01  11.413  < 2e-16 ***
+    ## regionwest           1.674e+00  2.056e-01   8.142 4.37e-15 ***
+    ## pdocs_1000          -3.845e-02  6.706e-02  -0.573 0.566744    
+    ## pbeds_1000           2.120e-01  5.223e-02   4.059 5.86e-05 ***
+    ## density_pop          2.150e-04  2.984e-05   7.203 2.69e-12 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 1.171 on 425 degrees of freedom
+    ## Multiple R-squared:  0.5602, Adjusted R-squared:  0.5457 
+    ## F-statistic: 38.66 on 14 and 425 DF,  p-value: < 2.2e-16
+
+``` r
+olsrr::ols_plot_resid_fit(trans_fit)
+```
+
+![](draft_yma_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+
+``` r
+olsrr::ols_plot_resid_qq(trans_fit)
+```
+
+![](draft_yma_files/figure-gfm/unnamed-chunk-25-2.png)<!-- -->
+
+``` r
+lambda_trans = MASS::boxcox(trans_fit)
+```
+
+![](draft_yma_files/figure-gfm/unnamed-chunk-25-3.png)<!-- -->
+
+``` r
+optlam_trans = lambda_trans$x[which.max(lambda_trans$y)]
+lambda_trans
+```
+
+    ## $x
+    ##   [1] -2.00000000 -1.95959596 -1.91919192 -1.87878788 -1.83838384 -1.79797980
+    ##   [7] -1.75757576 -1.71717172 -1.67676768 -1.63636364 -1.59595960 -1.55555556
+    ##  [13] -1.51515152 -1.47474747 -1.43434343 -1.39393939 -1.35353535 -1.31313131
+    ##  [19] -1.27272727 -1.23232323 -1.19191919 -1.15151515 -1.11111111 -1.07070707
+    ##  [25] -1.03030303 -0.98989899 -0.94949495 -0.90909091 -0.86868687 -0.82828283
+    ##  [31] -0.78787879 -0.74747475 -0.70707071 -0.66666667 -0.62626263 -0.58585859
+    ##  [37] -0.54545455 -0.50505051 -0.46464646 -0.42424242 -0.38383838 -0.34343434
+    ##  [43] -0.30303030 -0.26262626 -0.22222222 -0.18181818 -0.14141414 -0.10101010
+    ##  [49] -0.06060606 -0.02020202  0.02020202  0.06060606  0.10101010  0.14141414
+    ##  [55]  0.18181818  0.22222222  0.26262626  0.30303030  0.34343434  0.38383838
+    ##  [61]  0.42424242  0.46464646  0.50505051  0.54545455  0.58585859  0.62626263
+    ##  [67]  0.66666667  0.70707071  0.74747475  0.78787879  0.82828283  0.86868687
+    ##  [73]  0.90909091  0.94949495  0.98989899  1.03030303  1.07070707  1.11111111
+    ##  [79]  1.15151515  1.19191919  1.23232323  1.27272727  1.31313131  1.35353535
+    ##  [85]  1.39393939  1.43434343  1.47474747  1.51515152  1.55555556  1.59595960
+    ##  [91]  1.63636364  1.67676768  1.71717172  1.75757576  1.79797980  1.83838384
+    ##  [97]  1.87878788  1.91919192  1.95959596  2.00000000
+    ## 
+    ## $y
+    ##   [1] -930.4285 -919.7730 -909.2542 -898.8734 -888.6317 -878.5305 -868.5708
+    ##   [8] -858.7537 -849.0805 -839.5520 -830.1693 -820.9334 -811.8450 -802.9050
+    ##  [15] -794.1142 -785.4733 -776.9829 -768.6436 -760.4560 -752.4205 -744.5376
+    ##  [22] -736.8075 -729.2306 -721.8070 -714.5370 -707.4205 -700.4577 -693.6484
+    ##  [29] -686.9927 -680.4903 -674.1409 -667.9444 -661.9003 -656.0083 -650.2679
+    ##  [36] -644.6786 -639.2398 -633.9510 -628.8115 -623.8205 -618.9774 -614.2813
+    ##  [43] -609.7315 -605.3270 -601.0670 -596.9506 -592.9768 -589.1446 -585.4531
+    ##  [50] -581.9013 -578.4880 -575.2124 -572.0733 -569.0696 -566.2004 -563.4645
+    ##  [57] -560.8609 -558.3886 -556.0464 -553.8333 -551.7484 -549.7905 -547.9587
+    ##  [64] -546.2519 -544.6692 -543.2097 -541.8724 -540.6565 -539.5610 -538.5851
+    ##  [71] -537.7279 -536.9888 -536.3669 -535.8616 -535.4721 -535.1978 -535.0381
+    ##  [78] -534.9925 -535.0603 -535.2412 -535.5346 -535.9401 -536.4574 -537.0862
+    ##  [85] -537.8262 -538.6770 -539.6386 -540.7108 -541.8934 -543.1864 -544.5897
+    ##  [92] -546.1033 -547.7274 -549.4619 -551.3070 -553.2628 -555.3295 -557.5075
+    ##  [99] -559.7968 -562.1978
 
 #### Backward
 
@@ -735,7 +862,7 @@ Cp_b
 Cp_b %>% faraway::Cpplot()
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
 
 size is the number of parameters in the model, Cp is Cp
 
@@ -751,7 +878,7 @@ leaps(x = model.matrix(fit_forward)[,-1],
       method = "Cp") %>% faraway::Cpplot()
 ```
 
-![](draft_yma_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+![](draft_yma_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
 
 So, multiple model satisfies the Cp criteria here.
 

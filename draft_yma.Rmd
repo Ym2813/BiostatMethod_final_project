@@ -43,6 +43,10 @@ skimr::skim(cdi_descriptive) %>%
   knitr::kable(
     col.names = c("variable", "n_missing", "mean","sd","min","Q25","median","Q75","max","histogram"),
     caption = "Global Summary", digits = 4)
+
+ggplot(gather(cdi_descriptive), aes(value)) + 
+    geom_histogram(bins = 13) + 
+    facet_wrap(~key, scales = 'free_x')
 ```
 
 Q: 1. do we need to group them by state or county? group by gounty gives 5000+ rows though...
@@ -92,7 +96,7 @@ cor(cdi_descriptive) %>% knitr::kable()
 library(ggcorrplot)
 library(ggstatsplot)
 ggstatsplot::ggcorrmat(
-  data = cdi,
+  data = cdi_descriptive,
   type = "parametric", # parametric for Pearson, nonparametric for Spearman's correlation
   colors = c("darkred", "white", "steelblue") # change default colors
 )
@@ -249,10 +253,6 @@ cdi %>% filter(cty == "St._Loui")
 
 #### Full model predictors ok?
 
-included pop in addition to pop18, pop65. Do we need pop tho? Would pop18 and pop65 be enough already?
-
-did not include cty, state, area, crimes, totalinc, totalinc (included pcincome), do we need to include any of those? for example, both totalinc and pcincome, area and pop_den
-
 this model used `northeast` as the reference level for region 
 
 ```{r}
@@ -261,7 +261,34 @@ cdi_model = cdi %>% select(-c(id,cty,state,area,crimes,totalinc))
 # use 
 full_fit = lm(crm_1000 ~ ., data = cdi_model)
 summary(full_fit)
+
+ols_plot_resid_qq(full_fit)
+ols_plot_resid_fit(full_fit)
 ```
+
+
+## Transformation
+```{r}
+lambda = MASS::boxcox(full_fit)
+optlam = lambda$x[which.max(lambda$y)]
+optlam
+```
+
+The lambda from the transformation is 0.5454, so we will try to fit a square root transformation to y
+
+```{r}
+trans_fit = lm(crm_1000^0.5 ~ .,data = cdi_model)
+summary(trans_fit)
+
+ols_plot_resid_fit(trans_fit)
+ols_plot_resid_qq(trans_fit)
+
+lambda_trans = MASS::boxcox(trans_fit)
+optlam_trans = lambda_trans$x[which.max(lambda_trans$y)]
+lambda_trans
+```
+
+
 
 #### Backward
 
@@ -356,5 +383,12 @@ leaps(x = model.matrix(fit_forward)[,-1],
       y = cdi_model$crm_1000,
       nbest = 2,
       method = "adjr2") %>% faraway::maxadjr(10)
+```
+
+boxcox
+
+```{r}
+lambda = boxcox(cdi_model$crm_1000~1)
+optlam = lambda$x[which.max(lambda$y)]
 ```
 
