@@ -262,8 +262,8 @@ cdi_model = cdi %>% select(-c(id,cty,state,area,crimes,totalinc))
 full_fit = lm(crm_1000 ~ ., data = cdi_model)
 summary(full_fit)
 
-ols_plot_resid_qq(full_fit)
-ols_plot_resid_fit(full_fit)
+olsrr::ols_plot_resid_qq(full_fit)
+olsrr::ols_plot_resid_fit(full_fit)
 ```
 
 
@@ -280,8 +280,8 @@ The lambda from the transformation is 0.5454, so we will try to fit a square roo
 trans_fit = lm(crm_1000^0.5 ~ .,data = cdi_model)
 summary(trans_fit)
 
-ols_plot_resid_fit(trans_fit)
-ols_plot_resid_qq(trans_fit)
+olsrr::ols_plot_resid_fit(trans_fit)
+olsrr::ols_plot_resid_qq(trans_fit)
 
 lambda_trans = MASS::boxcox(trans_fit)
 optlam_trans = lambda_trans$x[which.max(lambda_trans$y)]
@@ -383,12 +383,5 @@ leaps(x = model.matrix(fit_forward)[,-1],
       y = cdi_model$crm_1000,
       nbest = 2,
       method = "adjr2") %>% faraway::maxadjr(10)
-```
-
-boxcox
-
-```{r}
-lambda = boxcox(cdi_model$crm_1000~1)
-optlam = lambda$x[which.max(lambda$y)]
 ```
 
