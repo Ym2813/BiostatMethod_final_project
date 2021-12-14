@@ -998,42 +998,42 @@ Did not use!! **backward**
 
 ``` r
 # No docs
-step1 = update(full_fit, . ~ . -pdocs_1000)
+step1 = update(trans_fit, . ~ . -pdocs_1000)
 summary(step1)
 ```
 
     ## 
     ## Call:
-    ## lm(formula = crm_1000 ~ pop + pop18 + pop65 + hsgrad + bagrad + 
+    ## lm(formula = crm_1000^0.5 ~ pop + pop18 + pop65 + hsgrad + bagrad + 
     ##     poverty + unemp + pcincome + region + pbeds_1000 + density_pop, 
     ##     data = cdi_model)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -47.985 -11.272  -0.703  10.132  76.056 
+    ## -4.0402 -0.7295  0.0707  0.7471  4.0630 
     ## 
     ## Coefficients:
     ##                       Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)         -6.820e+01  2.732e+01  -2.496 0.012936 *  
-    ## pop                  5.458e-06  1.578e-06   3.459 0.000596 ***
-    ## pop18                6.767e-01  3.291e-01   2.056 0.040406 *  
-    ## pop65               -1.959e-01  3.052e-01  -0.642 0.521291    
-    ## hsgrad               6.287e-01  2.679e-01   2.347 0.019396 *  
-    ## bagrad              -5.314e-01  2.876e-01  -1.847 0.065392 .  
-    ## poverty              1.867e+00  3.857e-01   4.839 1.83e-06 ***
-    ## unemp                6.044e-01  5.309e-01   1.138 0.255634    
-    ## pcincome             1.000e-03  4.692e-04   2.131 0.033651 *  
-    ## regionnorth central  9.061e+00  2.727e+00   3.323 0.000969 ***
-    ## regionsouth          2.782e+01  2.657e+00  10.471  < 2e-16 ***
-    ## regionwest           2.088e+01  3.088e+00   6.760 4.55e-11 ***
-    ## pbeds_1000           2.795e+00  5.663e-01   4.937 1.14e-06 ***
-    ## density_pop          4.871e-03  4.510e-04  10.799  < 2e-16 ***
+    ## (Intercept)         -1.586e+00  1.797e+00  -0.882 0.378105    
+    ## pop                  3.607e-07  1.038e-07   3.476 0.000561 ***
+    ## pop18                6.215e-02  2.165e-02   2.871 0.004297 ** 
+    ## pop65               -3.383e-03  2.008e-02  -0.169 0.866243    
+    ## hsgrad               3.562e-02  1.762e-02   2.021 0.043858 *  
+    ## bagrad              -3.749e-02  1.892e-02  -1.982 0.048144 *  
+    ## poverty              1.198e-01  2.537e-02   4.722 3.18e-06 ***
+    ## unemp                4.266e-02  3.492e-02   1.222 0.222514    
+    ## pcincome             9.360e-05  3.086e-05   3.033 0.002572 ** 
+    ## regionnorth central  7.110e-01  1.794e-01   3.964 8.66e-05 ***
+    ## regionsouth          1.998e+00  1.747e-01  11.432  < 2e-16 ***
+    ## regionwest           1.656e+00  2.031e-01   8.153 4.00e-15 ***
+    ## pbeds_1000           1.910e-01  3.725e-02   5.129 4.43e-07 ***
+    ## density_pop          2.132e-04  2.967e-05   7.188 2.97e-12 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 17.79 on 426 degrees of freedom
-    ## Multiple R-squared:  0.5886, Adjusted R-squared:  0.5761 
-    ## F-statistic: 46.89 on 13 and 426 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 1.17 on 426 degrees of freedom
+    ## Multiple R-squared:  0.5598, Adjusted R-squared:  0.5464 
+    ## F-statistic: 41.68 on 13 and 426 DF,  p-value: < 2.2e-16
 
 ``` r
 # No pop65
@@ -1043,34 +1043,34 @@ summary(step2)
 
     ## 
     ## Call:
-    ## lm(formula = crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    ## lm(formula = crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty + 
     ##     unemp + pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -47.962 -11.179  -0.733   9.945  76.658 
+    ## -4.0525 -0.7474  0.0681  0.7419  4.0605 
     ## 
     ## Coefficients:
     ##                       Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)         -7.455e+01  2.546e+01  -2.928 0.003589 ** 
-    ## pop                  5.424e-06  1.576e-06   3.442 0.000634 ***
-    ## pop18                7.829e-01  2.843e-01   2.753 0.006150 ** 
-    ## hsgrad               6.387e-01  2.672e-01   2.390 0.017287 *  
-    ## bagrad              -5.311e-01  2.874e-01  -1.848 0.065331 .  
-    ## poverty              1.916e+00  3.777e-01   5.073 5.84e-07 ***
-    ## unemp                5.619e-01  5.264e-01   1.067 0.286401    
-    ## pcincome             1.021e-03  4.678e-04   2.182 0.029685 *  
-    ## regionnorth central  9.392e+00  2.676e+00   3.509 0.000497 ***
-    ## regionsouth          2.791e+01  2.651e+00  10.526  < 2e-16 ***
-    ## regionwest           2.106e+01  3.072e+00   6.856 2.49e-11 ***
-    ## pbeds_1000           2.657e+00  5.233e-01   5.077 5.72e-07 ***
-    ## density_pop          4.851e-03  4.497e-04  10.787  < 2e-16 ***
+    ## (Intercept)         -1.695e+00  1.674e+00  -1.013 0.311653    
+    ## pop                  3.602e-07  1.036e-07   3.476 0.000560 ***
+    ## pop18                6.399e-02  1.869e-02   3.423 0.000679 ***
+    ## hsgrad               3.579e-02  1.757e-02   2.037 0.042260 *  
+    ## bagrad              -3.749e-02  1.890e-02  -1.984 0.047915 *  
+    ## poverty              1.207e-01  2.483e-02   4.859 1.66e-06 ***
+    ## unemp                4.193e-02  3.461e-02   1.211 0.226387    
+    ## pcincome             9.396e-05  3.076e-05   3.055 0.002393 ** 
+    ## regionnorth central  7.167e-01  1.759e-01   4.073 5.52e-05 ***
+    ## regionsouth          1.999e+00  1.743e-01  11.470  < 2e-16 ***
+    ## regionwest           1.659e+00  2.020e-01   8.215 2.56e-15 ***
+    ## pbeds_1000           1.886e-01  3.441e-02   5.483 7.17e-08 ***
+    ## density_pop          2.129e-04  2.957e-05   7.201 2.72e-12 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 17.78 on 427 degrees of freedom
-    ## Multiple R-squared:  0.5882, Adjusted R-squared:  0.5767 
-    ## F-statistic: 50.83 on 12 and 427 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 1.169 on 427 degrees of freedom
+    ## Multiple R-squared:  0.5598, Adjusted R-squared:  0.5474 
+    ## F-statistic: 45.25 on 12 and 427 DF,  p-value: < 2.2e-16
 
 ``` r
 # No unemp
@@ -1080,66 +1080,99 @@ summary(step3)
 
     ## 
     ## Call:
-    ## lm(formula = crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    ## lm(formula = crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty + 
     ##     pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -48.679 -10.886  -0.826   9.973  76.374 
+    ## -4.1030 -0.7127  0.0509  0.7647  4.0519 
     ## 
     ## Coefficients:
     ##                       Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)         -6.700e+01  2.446e+01  -2.739 0.006413 ** 
-    ## pop                  5.350e-06  1.574e-06   3.398 0.000742 ***
-    ## pop18                7.817e-01  2.844e-01   2.749 0.006236 ** 
-    ## hsgrad               5.852e-01  2.626e-01   2.229 0.026334 *  
-    ## bagrad              -5.929e-01  2.816e-01  -2.106 0.035819 *  
-    ## poverty              2.039e+00  3.598e-01   5.666 2.68e-08 ***
-    ## pcincome             1.109e-03  4.605e-04   2.408 0.016467 *  
-    ## regionnorth central  9.017e+00  2.653e+00   3.398 0.000742 ***
-    ## regionsouth          2.703e+01  2.520e+00  10.726  < 2e-16 ***
-    ## regionwest           2.083e+01  3.065e+00   6.797 3.61e-11 ***
-    ## pbeds_1000           2.497e+00  5.014e-01   4.980 9.25e-07 ***
-    ## density_pop          4.834e-03  4.495e-04  10.755  < 2e-16 ***
+    ## (Intercept)         -1.132e+00  1.609e+00  -0.704 0.481943    
+    ## pop                  3.546e-07  1.036e-07   3.425 0.000675 ***
+    ## pop18                6.390e-02  1.870e-02   3.416 0.000695 ***
+    ## hsgrad               3.180e-02  1.727e-02   1.842 0.066215 .  
+    ## bagrad              -4.210e-02  1.852e-02  -2.273 0.023503 *  
+    ## poverty              1.298e-01  2.367e-02   5.485 7.08e-08 ***
+    ## pcincome             1.005e-04  3.029e-05   3.320 0.000979 ***
+    ## regionnorth central  6.887e-01  1.745e-01   3.946 9.27e-05 ***
+    ## regionsouth          1.933e+00  1.657e-01  11.667  < 2e-16 ***
+    ## regionwest           1.642e+00  2.016e-01   8.145 4.19e-15 ***
+    ## pbeds_1000           1.767e-01  3.298e-02   5.358 1.38e-07 ***
+    ## density_pop          2.117e-04  2.957e-05   7.159 3.56e-12 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 17.78 on 428 degrees of freedom
-    ## Multiple R-squared:  0.5871, Adjusted R-squared:  0.5765 
-    ## F-statistic: 55.33 on 11 and 428 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 1.17 on 428 degrees of freedom
+    ## Multiple R-squared:  0.5583, Adjusted R-squared:  0.5469 
+    ## F-statistic: 49.18 on 11 and 428 DF,  p-value: < 2.2e-16
 
 ``` r
-mult.fit.final = lm(formula = crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+step4 = update(step3, . ~ . -hsgrad)
+summary(step4)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = crm_1000^0.5 ~ pop + pop18 + bagrad + poverty + 
+    ##     pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -4.1569 -0.6875  0.0329  0.7588  4.0610 
+    ## 
+    ## Coefficients:
+    ##                       Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)          1.459e+00  7.825e-01   1.864   0.0630 .  
+    ## pop                  3.435e-07  1.037e-07   3.313   0.0010 ***
+    ## pop18                6.095e-02  1.869e-02   3.261   0.0012 ** 
+    ## bagrad              -2.084e-02  1.452e-02  -1.435   0.1520    
+    ## poverty              1.027e-01  1.858e-02   5.526 5.68e-08 ***
+    ## pcincome             8.435e-05  2.906e-05   2.902   0.0039 ** 
+    ## regionnorth central  7.824e-01  1.674e-01   4.674 3.96e-06 ***
+    ## regionsouth          1.930e+00  1.662e-01  11.615  < 2e-16 ***
+    ## regionwest           1.741e+00  1.948e-01   8.937  < 2e-16 ***
+    ## pbeds_1000           1.819e-01  3.295e-02   5.520 5.88e-08 ***
+    ## density_pop          2.063e-04  2.950e-05   6.993 1.04e-11 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 1.173 on 429 degrees of freedom
+    ## Multiple R-squared:  0.5548, Adjusted R-squared:  0.5444 
+    ## F-statistic: 53.46 on 10 and 429 DF,  p-value: < 2.2e-16
+
+``` r
+mult.fit.final = lm(crm_1000^0.5 ~ pop + pop18 + bagrad + poverty + 
     pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
 summary(mult.fit.final)
 ```
 
     ## 
     ## Call:
-    ## lm(formula = crm_1000 ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    ## lm(formula = crm_1000^0.5 ~ pop + pop18 + bagrad + poverty + 
     ##     pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -48.679 -10.886  -0.826   9.973  76.374 
+    ## -4.1569 -0.6875  0.0329  0.7588  4.0610 
     ## 
     ## Coefficients:
     ##                       Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)         -6.700e+01  2.446e+01  -2.739 0.006413 ** 
-    ## pop                  5.350e-06  1.574e-06   3.398 0.000742 ***
-    ## pop18                7.817e-01  2.844e-01   2.749 0.006236 ** 
-    ## hsgrad               5.852e-01  2.626e-01   2.229 0.026334 *  
-    ## bagrad              -5.929e-01  2.816e-01  -2.106 0.035819 *  
-    ## poverty              2.039e+00  3.598e-01   5.666 2.68e-08 ***
-    ## pcincome             1.109e-03  4.605e-04   2.408 0.016467 *  
-    ## regionnorth central  9.017e+00  2.653e+00   3.398 0.000742 ***
-    ## regionsouth          2.703e+01  2.520e+00  10.726  < 2e-16 ***
-    ## regionwest           2.083e+01  3.065e+00   6.797 3.61e-11 ***
-    ## pbeds_1000           2.497e+00  5.014e-01   4.980 9.25e-07 ***
-    ## density_pop          4.834e-03  4.495e-04  10.755  < 2e-16 ***
+    ## (Intercept)          1.459e+00  7.825e-01   1.864   0.0630 .  
+    ## pop                  3.435e-07  1.037e-07   3.313   0.0010 ***
+    ## pop18                6.095e-02  1.869e-02   3.261   0.0012 ** 
+    ## bagrad              -2.084e-02  1.452e-02  -1.435   0.1520    
+    ## poverty              1.027e-01  1.858e-02   5.526 5.68e-08 ***
+    ## pcincome             8.435e-05  2.906e-05   2.902   0.0039 ** 
+    ## regionnorth central  7.824e-01  1.674e-01   4.674 3.96e-06 ***
+    ## regionsouth          1.930e+00  1.662e-01  11.615  < 2e-16 ***
+    ## regionwest           1.741e+00  1.948e-01   8.937  < 2e-16 ***
+    ## pbeds_1000           1.819e-01  3.295e-02   5.520 5.88e-08 ***
+    ## density_pop          2.063e-04  2.950e-05   6.993 1.04e-11 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 17.78 on 428 degrees of freedom
-    ## Multiple R-squared:  0.5871, Adjusted R-squared:  0.5765 
-    ## F-statistic: 55.33 on 11 and 428 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 1.173 on 429 degrees of freedom
+    ## Multiple R-squared:  0.5548, Adjusted R-squared:  0.5444 
+    ## F-statistic: 53.46 on 10 and 429 DF,  p-value: < 2.2e-16
