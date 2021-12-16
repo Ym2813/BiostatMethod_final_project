@@ -8,6 +8,7 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(leaps)
 library(readr)
 ```
 
@@ -25,7 +26,7 @@ cdi = read_csv("cdi.csv") %>%
          density_pop = pop/area,
          # convert region to factors and recoded them accordingly 
          region = factor(region, levels = 1:4,
-                    labels = c("northeast", "north central", "south", "west"))) %>% select(-c(docs,beds)) %>% view()
+                    labels = c("northeast", "northcentral", "south", "west"))) %>% select(-c(docs,beds))
   
 ```
 
@@ -190,17 +191,7 @@ cdi %>%
 
 do we look at the distribution of outcome like this and transform them here? check again
 
-### States with unusual rates
-
-group by state
-```{r}
-cdi_by_state = cdi %>% group_by(state) %>% 
-  summarise(state_pop = sum(pop),
-            state_crimes = sum(crimes)) %>% 
-  mutate(state_CRM_1000 = 1000*state_crimes/state_pop)
-```
-
-Not sure what counts as out lier, this is what the other group did. 
+### Counties with unusual rates
 
 ```{r}
 upper = quantile(cdi$crm_1000, 0.75)
@@ -213,22 +204,6 @@ cdi %>%
   knitr::kable(digits = 2)
 ```
 
-
-This shows no outlier on the state level tho... 
-
-```{r}
-upper = quantile(cdi_by_state$state_CRM_1000, 0.75)
-lower = quantile(cdi_by_state$state_CRM_1000, 0.25)
-IQR = upper - lower
-cdi_by_state %>% 
-  filter(state_CRM_1000 > upper + 1.5*IQR,
-         state_CRM_1000 > lower - 1.5*IQR) %>% 
-  dplyr::select(state, state_CRM_1000) %>%
-  knitr::kable(digits = 2)
-boxplot(cdi_by_state$state_CRM_1000, main = 'State Crime Rate per 1000 people')
-```
-
-**we probably need to plot region as well? not sure**
 
 ## Model! 
 
@@ -260,8 +235,14 @@ optlam
 
 The lambda from the transformation is 0.5454, so we will try to fit a square root transformation to Y
 
+### New tibble with transformed crm_1000 -> crm_1000_sqr
 ```{r}
-trans_fit = lm(crm_1000^0.5 ~ .,data = cdi_model)
+cdi_trans = cdi_model %>% mutate(crm_1000_sqr = crm_1000^0.5) %>% select(-c(crm_1000))
+```
+
+
+```{r}
+trans_fit = lm(crm_1000_sqr ~ .,data = cdi_trans)
 summary(trans_fit)
 
 olsrr::ols_plot_resid_fit(trans_fit)
@@ -269,10 +250,26 @@ olsrr::ols_plot_resid_qq(trans_fit)
 
 lambda_trans = MASS::boxcox(trans_fit)
 optlam_trans = lambda_trans$x[which.max(lambda_trans$y)]
-lambda_trans
-
-cdi_trans = cdi_model %>% mutate(crm_1000_sqr = crm_1000^0.5) %>% select(-c(crm_1000))
+optlam_trans
 ```
+
+### Counties with unusual rates
+
+```{r}
+upper = quantile(cdi_trans$crm_1000_sqr, 0.75)
+lower = quantile(cdi_trans$crm_1000_sqr, 0.25)
+IQR = upper - lower
+
+cdi_trans %>% 
+  filter(crm_1000_sqr > upper + 1.5*IQR,
+         crm_1000_sqr > lower - 1.5*IQR) %>% 
+  dplyr::select(crm_1000_sqr) %>% 
+  mutate(cty = c("Kings", "St._Loui")) %>% 
+  knitr::kable(digits = 2)
+
+# cdi %>% filter(pop == 2300664 | pop == 396685) %>% select(cty,pop)
+```
+
 
 
 #### Backward
@@ -286,13 +283,12 @@ olsrr::ols_plot_resid_qq(fit_back)
 MASS::boxcox(fit_back)
 ```
 
-lm(formula = crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty + 
-    pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
+Backward: crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + region + pbeds_1000 + density_pop
 
 #### forward 
 
 ```{r}
-fit_forward = step(trans_fit, direction='forward')
+fit_forward = step(trans_fit, direction="forward")
 fit_forward
 
 olsrr::ols_plot_resid_fit(fit_forward)
@@ -300,9 +296,10 @@ olsrr::ols_plot_resid_qq(fit_forward)
 MASS::boxcox(fit_forward)
 ```
 
-lm(formula = crm_1000^0.5 ~ pop + pop18 + pop65 + hsgrad + bagrad + 
+lm(formula = crm_1000_sqr ~ pop + pop18 + pop65 + hsgrad + bagrad + 
     poverty + unemp + pcincome + region + pdocs_1000 + pbeds_1000 + 
-    density_pop, data = cdi_model)
+    density_pop, data = cdi_trans)
+
 
 #### both
 
@@ -317,6 +314,71 @@ lm(formula = crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty +
 
 This gives back the same model as back 
   
+## Criterion Based: Adjr2 and Cp
+
+```{r}
+# printing the 2 best models of each size. For example, the first two lines: print the best 2 models that have 2 variables (including intercept)
+
+models <- regsubsets(crm_1000_sqr ~., data = cdi_trans,nvmax = 12)
+res_sum = summary(models)
+
+par(mfrow=c(1,2))
+plot(1:12, res_sum$cp, xlab="No of parameters", ylab="Cp Statistic")
+plot(1:12, res_sum$adjr2, xlab="No of parameters", ylab="Adj R2")
+
+mod_s = data.frame(
+  Adj.R2 = which.max(res_sum$adjr2),
+  CP = which.min(res_sum$cp)
+)
+
+get_model_formula <- function(id, object, outcome){
+  # get models data
+  models <- summary(object)$which[id,-1]
+  # Get outcome variable
+  #form <- as.formula(object$call[[2]])
+  #outcome <- all.vars(form)[1]
+  # Get model predictors
+  predictors <- names(which(models == TRUE))
+  predictors <- paste(predictors, collapse = "+")
+  # Build model formula
+  as.formula(paste0(outcome, "~", predictors))
+}
+```
+
+Model chosen by Adj $R^2$:
+
+```{r}
+get_model_formula(12, models, "crm_1000_sqr")
+```
+
+
+```{r}
+fit_adjr = lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + pcincome + region+ pbeds_1000 + density_pop, data = cdi_trans)
+
+olsrr::ols_plot_resid_fit(fit_adjr)
+olsrr::ols_plot_resid_qq(fit_adjr)
+MASS::boxcox(fit_adjr)
+```
+
+crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + pcincome + region+ pbeds_1000 + density_pop
+
+Model chosen by Cp: Same with backward 
+
+```{r}
+get_model_formula(11, models, "crm_1000_sqr")
+```
+
+crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + region+ pbeds_1000 + density_pop
+
+
+```{r}
+fit_Cp = lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + region+ pbeds_1000 + density_pop, data=cdi_trans)
+
+olsrr::ols_plot_resid_fit(fit_Cp)
+olsrr::ols_plot_resid_qq(fit_Cp)
+MASS::boxcox(fit_Cp)
+```
+
 ### Criterion
 
 #### Cp
@@ -325,6 +387,8 @@ This gives back the same model as back
 olsrr::ols_mallows_cp(fit_back,trans_fit)
 olsrr::ols_mallows_cp(fit_forward,trans_fit)
 olsrr::ols_mallows_cp(fit_both,trans_fit)
+olsrr::ols_mallows_cp(fit_adjr,trans_fit)
+olsrr::ols_mallows_cp(fit_Cp,trans_fit)
 ```
 
 #### Adj R2
@@ -332,72 +396,221 @@ olsrr::ols_mallows_cp(fit_both,trans_fit)
 ```{r}
 summary(fit_back) # 0.5469
 summary(fit_forward) #0.5457
-summary(fit_both) #5469
+summary(fit_both) #0.5469
+summary(fit_adjr) #0.5474
+summary(fit_Cp) #0.5469
 ```
 
-### BIC
+#### BIC
 
 ```{r}
 library(flexmix)
-BIC(fit_back)
-BIC(fit_forward)
-BIC(fit_both)
+BIC(fit_back) #1453.527
+BIC(fit_forward) #1469.908
+BIC(fit_both) #1453.527
+BIC(fit_adjr) # 1458.104
+BIC(fit_Cp) #1453.527
+```
+
+#### MSE
+
+```{r}
+back_summ =summary(fit_back) #1.331
+mean(back_summ$residuals^2)
+
+forward_summ =summary(fit_forward) #1.325
+mean(forward_summ$residuals^2)
+
+both_summ =summary(fit_both) #1.331
+mean(both_summ$residuals^2)
+
+adjr_summ =summary(fit_adjr) #1.326
+mean(adjr_summ$residuals^2)
+
+Cp_summ =summary(fit_Cp) #1.331
+mean(Cp_summ$residuals^2)
 ```
 
 
-## Cp
+## Check Collinearity
 
-didn't use any of this!
-```{r, include=FALSE}
-# printing the 2 best models of each size. For example, the first two lines: print the best 2 models that have 2 variables (including intercept)
-library(leaps)
-Cp_b = leaps(x = model.matrix(trans_fit)[,-1],
-      y = cdi_trans$crm_1000_sqr,
-      nbest = 2,
-      method = "Cp")
-
-mod_b = Cp_b$Cp[which(Cp_b$Cp <= Cp_b$size)]
+```{r}
+performance::check_collinearity(fit_back)
+performance::check_collinearity(fit_forward)
+performance::check_collinearity(fit_adjr)
+performance::check_collinearity(fit_Cp)
 ```
 
-size is the number of parameters in the model, Cp is Cp
+delete vif larger than 10. Non of them are greater than 10. So all of the models are good, don't have to worry about collinearity. 
 
-The plot shows the model that satisfy the criteria, number indicates the number of parameters it included. in this case, the 1st to the last.
-
-
-**forward**
-```{r, include=FALSE}
-Cp_f = leaps(x = model.matrix(fit_forward)[,-1],
-      y = cdi_trans$crm_1000_sqr,
-      nbest = 2,
-      method = "Cp")
-
-mod_f = Cp_f$Cp[which(Cp_f$Cp <= Cp_f$size)]
+```{r}
+par(mfrow=c(2,2))
+plot(fit_back)
 ```
 
-So, multiple model satisfies the Cp criteria here. 
+## Checking to Outliers and Influential Points
 
-#### Adj R2
+### Back
 
-Did not use!!
-**backward**
-```{r, include=FALSE}
-adjr_b = leaps(x = model.matrix(fit_back)[,-1],
-      y = cdi_trans$crm_1000_sqr,
-      nbest = 2,
-      method = "adjr2") 
-
-adjr_b
-
-adjr_b%>% 
-  faraway::maxadjr(10)
+#### Old Method
+```{r}
+# residuals vs leverage plot
+plot(fit_back, which = 4)
+#remove outliers
+cdi_trans_without = cdi_trans[-c(1, 6, 53),]
+fit_without = lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + 
+    pcincome + region + pbeds_1000 + density_pop, data = cdi_trans_without)
+summary(fit_without)
 ```
-**forward**
-```{r, include=FALSE}
-leaps(x = model.matrix(fit_forward)[,-1],
-      y = cdi_trans$crm_1000_sqr,
-      nbest = 2,
-      method = "adjr2") %>% faraway::maxadjr(10)
+
+```{r}
+par(mfrow=c(2,2))
+plot(fit_without)
 ```
+
+
+### Threshold: $D_{i}>\frac{4}{n} = \frac{4}{440} = 0.009$
+```{r}
+cook = olsrr::ols_plot_cooksd_bar(fit_back, print_plot = TRUE)
+normal = cook$data$color == "normal"
+outlier = cook$data$color == "outlier"
+```
+
+```{r}
+outlier_df = cdi[outlier,]
+```
+
+This gives us 21 outliers. We should consider if we want to take them all out
+
+### Build model without outlier 
+
+Here's what happens when we take them all out. 
+
+```{r}
+cdi_trans_without = cdi_trans[normal,]
+```
+
+Built the without model with **fit_back**
+
+```{r}
+fit_without = lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + region + pbeds_1000 + density_pop, data = cdi_trans_without)
+
+summary(fit_without)
+
+# Residual performance
+par(mfrow=c(2,2))
+olsrr::ols_plot_resid_fit(fit_without)
+olsrr::ols_plot_resid_qq(fit_without)
+MASS::boxcox(fit_without)
+
+#Cp -88.45??
+olsrr::ols_mallows_cp(fit_without,trans_fit)
+#BIC: 1274.534
+BIC(fit_without) 
+#MSE
+without_summ =summary(fit_without) #1.017
+mean(without_summ$residuals^2)
+#VIF 
+performance::check_collinearity(fit_without)
+```
+
+Built the without model with **fit_adjr**
+
+```{r}
+fit_without2 = lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + pcincome + region+ pbeds_1000 + density_pop, data = cdi_trans_without)
+
+summary(fit_without2)
+
+# Residual performance
+par(mfrow=c(2,2))
+olsrr::ols_plot_resid_fit(fit_without2)
+olsrr::ols_plot_resid_qq(fit_without2)
+MASS::boxcox(fit_without2)
+
+#Cp -87.5??
+olsrr::ols_mallows_cp(fit_without2,trans_fit)
+#BIC: 1279.154
+BIC(fit_without2)
+#MSE
+without2_summ =summary(fit_without2) #1.013
+mean(without2_summ$residuals^2)
+#VIF 
+performance::check_collinearity(fit_without2) 
+```
+
+
+# Model Validation
+
+## Compute RMSE and adjusted R^2 by cross-validation
+
+Using back and adjr model and data without outlier
+
+```{r warning=FALSE}
+library(modelr)
+set.seed(1)
+cv_df = 
+  crossv_kfold(cdi_trans_without, k = 5) %>% 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble))
+
+cv_df = 
+  cv_df %>%
+  mutate(
+    fit_back = map(train, ~lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + region + pbeds_1000 + density_pop, data = .x)),
+    trans_fit = map(train, ~lm(crm_1000_sqr ~ pop + pop18 + pop65+ hsgrad + bagrad + poverty + unemp + pcincome + region+ +pdocs_1000+pbeds_1000 + density_pop, data = .x)),
+    fit_adjr = map(train, ~lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + pcincome + region+ pbeds_1000 + density_pop, data = .x)),
+    fit_forward = map(train, ~lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + pcincome + region+ pbeds_1000 + density_pop, data = .x))) %>% 
+  mutate(
+    rmse_model2 = map2_dbl(fit_back, test, ~rmse(model = .x, data = .y)),
+    rmse_model3 = map2_dbl(trans_fit, test, ~rmse(model = .x, data = .y)),
+    rmse_model4 = map2_dbl(fit_adjr, test, ~rmse(model = .x, data = .y)),
+    rmse_model5 = map2_dbl(fit_forward, test, ~rmse(model = .x, data = .y))) %>%
+  mutate(
+    mspe_model2 = map2_dbl(fit_back, test, ~ mean((.y$crm_1000_sqr -predict.lm(.x,.y))^2)),
+    mspe_model3 = map2_dbl(trans_fit, test, ~ mean((.y$crm_1000_sqr -predict.lm(.x,.y))^2)),
+    mspe_model4 = map2_dbl(fit_adjr, test, ~ mean((.y$crm_1000_sqr -predict.lm(.x,.y))^2)),
+    mspe_model5 = map2_dbl(fit_forward, test, ~ mean((.y$crm_1000_sqr -predict.lm(.x,.y))^2))
+  ) %>% 
+  mutate(
+    res_model2 = map(fit_back, broom::glance %>% as.data.frame),
+    res_model3 = map(trans_fit, broom::glance %>% as.data.frame),
+    res_model4 = map(fit_adjr, broom::glance %>% as.data.frame),
+    res_model5 = map(fit_forward, broom::glance %>% as.data.frame)) %>%
+  unnest(res_model2, res_model3, res_model4, res_model5) %>%
+  dplyr::select(rmse_model2,rmse_model3,rmse_model4,rmse_model5,
+                mspe_model2,mspe_model3,mspe_model4,mspe_model5,
+                value.adj.r.squared,value.adj.r.squared1,value.adj.r.squared2,value.adj.r.squared3) %>%
+  rename(adjR_model2 = value.adj.r.squared,
+         adjR_model3 = value.adj.r.squared1,
+         adjR_model4 = value.adj.r.squared2,
+         adjR_model5 = value.adj.r.squared3)
+
+cv_df %>%
+  summarise_each(funs(mean( .,na.rm = TRUE))) %>%
+  t()
+```
+
+
+
+## Plot the violin plot
+```{r warning=FALSE}
+unnest_cd_df = cv_df %>%
+  pivot_longer(rmse_model2:adjR_model5, 
+               names_pattern = "(.*)(......)$", 
+               names_to = c("limit", "model")) %>% 
+  mutate(limit=ifelse(limit=="", "value", limit)) %>%
+  pivot_wider(id_cols = model, 
+              names_from = limit, 
+              values_from = value, 
+              names_repair = "check_unique") %>% 
+  unnest(c(rmse_, adjR_)) %>%
+  rename(rmse = rmse_,
+         adjR = adjR_)
+unnest_cd_df %>% ggplot(aes(x = model, y = rmse)) + geom_violin() 
+unnest_cd_df %>% ggplot(aes(x = model, y = adjR)) + geom_violin() 
+```
+
 
 ## backward by hand
 
@@ -421,3 +634,4 @@ mult.fit.final = lm(crm_1000^0.5 ~ pop + pop18 + bagrad + poverty +
     pcincome + region + pbeds_1000 + density_pop, data = cdi_model)
 summary(mult.fit.final)
 ```
+
