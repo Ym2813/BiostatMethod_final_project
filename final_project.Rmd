@@ -1,7 +1,7 @@
 ---
-title: "draft_yma"
+title: "Final project"
 author: "Anna Ma"
-date: "12/12/2021"
+date: "12/17/2021"
 output: github_document
 ---
 
@@ -13,10 +13,7 @@ library(readr)
 library(flexmix)
 ```
 
-## Data exploration
-
- **converted variables to per person and docs, beds, etc.** 
-
+# Data exploration
 
 ```{r, message=FALSE}
 cdi = read_csv("cdi.csv") %>%
@@ -31,7 +28,7 @@ cdi = read_csv("cdi.csv") %>%
   
 ```
 
-### Descriptive statistics of all varaibles
+## Descriptive statistics of all varaibles
 ```{r statistic summary}
 
 cdi_descriptive = cdi %>% select(-c(id,cty,state,region))
@@ -47,12 +44,7 @@ skimr::skim(cdi_descriptive) %>%
     caption = "Global Summary", digits = 4)
 ```
 
-Q: 1. do we need to group them by state or county? group by gounty gives 5000+ rows though...
-  2. do we need box plot still? 
-  3. again, transfer some variables to "per pop" / "per 1000 pop" ?
-
-
-### Descriptive analysis
+## Descriptive analysis
 
 We can use the box plot/ or histogram to check for normality. But I forgot when do we need normality...isn't it for residual??
 
@@ -77,13 +69,12 @@ boxplot(cdi$poverty, main = "poverty")
 boxplot(cdi$unemp,main = "unemp")
 boxplot(cdi$pcincome, main = "pcincome")
 boxplot(cdi$totalinc, main = "totalinc")
-
 ```
 
 
-### Correlation 
+## Correlation 
 
-#### Pairwise relationship 
+### Pairwise relationship 
 
 * This gives us an idea of the correlation between each variable, but my old project build whole model first then assessed the correlation. Need Discussion!
 
@@ -92,25 +83,18 @@ library(corrplot)
 cor(cdi_descriptive) %>% knitr::kable()
 
 library(ggcorrplot)
-library(ggstatsplot)
-ggstatsplot::ggcorrmat(
-  data = cdi_descriptive,
-  type = "parametric", 
-  colors = c("darkred", "white", "steelblue") # change default colors
-)
-
 
 ggcorrplot(cor(cdi_descriptive), type = "upper",
    lab = TRUE)
 ```
 
+Scatter plot 
 
-* Here is the correlation with pairs function. More specific than the heat map above. We can observe the correlation between all the terms here
 ```{r}
 pairs(crm_1000 ~.,data=cdi_descriptive, panel = panel.smooth, upper.panel = NULL, main = "Scatterplot Matrix")
 ```
 
-#### Marginal distribution ?
+## Marginal distribution
 
 ```{r}
 library(ggplot2)
@@ -184,8 +168,7 @@ ggMarginal(marg_totalinc, type = "histogram", fill="transparent")
 ```
 
 
-
-### Distribution of outcome
+## Distribution of outcome
 
 ```{r}
 cdi %>% 
@@ -195,7 +178,7 @@ cdi %>%
 
 do we look at the distribution of outcome like this and transform them here? check again
 
-### Counties with unusual rates
+## Counties with unusual rates
 
 ```{r}
 upper = quantile(cdi$crm_1000, 0.75)
@@ -208,13 +191,10 @@ cdi %>%
   knitr::kable(digits = 2)
 ```
 
-
-## Model! 
-
-**Q: do we need more descriptive analysis, visualization? rate of crime for each state?**
+# Model
 
 
-#### Full model predictors
+## Full model predictors
 
 this model used `northeast` as the reference level for region 
 
@@ -239,7 +219,7 @@ optlam
 
 The lambda from the transformation is 0.5454, so we will try to fit a square root transformation to Y
 
-### New tibble with transformed y
+New tibble with transformed Y:
 ```{r}
 cdi_trans = cdi_model %>% mutate(crm_1000_sqr = crm_1000^0.5) %>% select(-c(crm_1000))
 ```
@@ -270,13 +250,12 @@ cdi_trans %>%
   dplyr::select(crm_1000_sqr) %>% 
   mutate(cty = c("Kings", "St._Loui")) %>% 
   knitr::kable(digits = 2)
-
-# cdi %>% filter(pop == 2300664 | pop == 396685) %>% select(cty,pop)
-
-cdi_trans_without1 = cdi_tans[]
 ```
 
 
+## Model Selection 
+
+### Step-wise approach 
 
 #### Backward
 
@@ -302,14 +281,14 @@ olsrr::ols_plot_resid_qq(fit_forward)
 MASS::boxcox(fit_forward)
 ```
 
-lm(formula = crm_1000_sqr ~ pop + pop18 + pop65 + hsgrad + bagrad + 
+model: crm_1000_sqr ~ pop + pop18 + pop65 + hsgrad + bagrad + 
     poverty + unemp + pcincome + region + pdocs_1000 + pbeds_1000 + 
     density_pop, data = cdi_trans)
 
 
 #### both
 
-step-wise?
+step-wise
 
 ```{r}
 fit_both = step(trans_fit, direction='both')
@@ -320,7 +299,7 @@ lm(formula = crm_1000^0.5 ~ pop + pop18 + hsgrad + bagrad + poverty +
 
 This gives back the same model as back 
   
-## Criterion Based: Adjr2 and Cp
+### Criterion Based: Adjr2 and Cp
 
 ```{r}
 # printing the 2 best models of each size. For example, the first two lines: print the best 2 models that have 2 variables (including intercept)
@@ -386,110 +365,6 @@ MASS::boxcox(fit_Cp)
 ```
 
 
-```{r}
-fit_back_int = lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + region + pbeds_1000 + density_pop + pcincome*poverty, data = cdi_trans)
-summary(fit_back_int)
-
-olsrr::ols_plot_resid_fit(fit_back_int)
-olsrr::ols_plot_resid_qq(fit_back_int)
-MASS::boxcox(fit_back_int)
-#Cp
-olsrr::ols_mallows_cp(fit_back_int,trans_fit) #13.94
-#adjr 0.5701
-
-BIC(fit_back_int) #1435.05
-
-back_int_summ =summary(fit_back_int) #1.331
-mean(back_int_summ$residuals^2) #1.2598
-
-performance::check_collinearity(fit_back_int)
-
-fit_back_int_without = lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + region + pbeds_1000 + density_pop + pcincome*poverty, data = cdi_trans_without)
-
-summary(fit_back_int_without) #adjr 0.5658
-
-# Residual performance
-par(mfrow=c(2,2))
-olsrr::ols_plot_resid_fit(fit_back_int_without)
-olsrr::ols_plot_resid_qq(fit_back_int_without)
-MASS::boxcox(fit_back_int_without)
-
-#Cp -38.65??
-olsrr::ols_mallows_cp(fit_back_int_without,trans_fit)
-#BIC: 1401.441
-BIC(fit_back_int_without) 
-#MSE
-back_int_without_summ =summary(fit_back_int_without) #1.18
-mean(back_int_without_summ$residuals^2)
-#VIF 
-performance::check_collinearity(fit_back_int_without)
-```
-
-
-### Criterion
-
-#### Cp
-
-```{r}
-olsrr::ols_mallows_cp(fit_back,trans_fit)
-olsrr::ols_mallows_cp(fit_forward,trans_fit)
-olsrr::ols_mallows_cp(fit_both,trans_fit)
-olsrr::ols_mallows_cp(fit_adjr,trans_fit)
-olsrr::ols_mallows_cp(fit_Cp,trans_fit)
-```
-
-#### Adj R2
-
-```{r}
-summary(fit_back) # 0.5469
-summary(fit_forward) #0.5457
-summary(fit_both) #0.5469
-summary(fit_adjr) #0.5474
-summary(fit_Cp) #0.5469
-```
-
-#### AIC
-
-```{r}
-AIC(fit_back) # 1400.399
-AIC(fit_forward) #1404.519
-AIC(fit_both) #1400.399
-AIC(fit_adjr) # 1400.889
-AIC(fit_Cp) # 1400.399
-```
-
-
-#### BIC
-
-```{r}
-library(flexmix)
-BIC(fit_back) #1453.527
-BIC(fit_forward) #1469.908
-BIC(fit_both) #1453.527
-BIC(fit_adjr) # 1458.104
-BIC(fit_Cp) #1453.527
-```
-
-#### MSE
-
-```{r}
-back_summ =summary(fit_back) #1.331
-mean(back_summ$residuals^2)
-
-forward_summ =summary(fit_forward) #1.325
-mean(forward_summ$residuals^2)
-
-both_summ =summary(fit_both) #1.331
-mean(both_summ$residuals^2)
-
-adjr_summ =summary(fit_adjr) #1.326
-mean(adjr_summ$residuals^2)
-
-Cp_summ =summary(fit_Cp) #1.331
-mean(Cp_summ$residuals^2)
-```
-
-
 ## Check Collinearity
 
 ```{r}
@@ -499,30 +374,29 @@ performance::check_collinearity(fit_adjr)
 performance::check_collinearity(fit_Cp)
 ```
 
-delete vif larger than 10. Non of them are greater than 10. So all of the models are good, don't have to worry about collinearity.  
+Delete predictors when vif larger than 10. Non of them are greater than 10. So all of the models are good, don't have to worry about collinearity.  
 
 ## Checking to Outliers and Influential Points
 
 ```{r}
-olsrr::ols_plot_cooksd_bar(strp_back, print_plot = TRUE)
+olsrr::ols_plot_cooksd_bar(fit_back, print_plot = TRUE)
 #remove observations whose cook's D > 0.5
 cdi_trans_without = cdi_trans[-c(1, 6),]
 ```
 
-### Build model without outlier 
+## Build model without outlier 
 
 Built the without model with **fit_back**
 
 ```{r}
 fit_back_without = lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + region + pbeds_1000 + density_pop, data = cdi_trans_without)
 
-summary(fit_without)
+summary(fit_back_without)
 
 # Residual performance
 par(mfrow=c(2,2))
 olsrr::ols_plot_resid_fit(fit_back_without)
 olsrr::ols_plot_resid_qq(fit_back_without)
-MASS::boxcox(fit_back_without)
 ```
 
 Build the without model with **trans_fit** (full model)
@@ -536,7 +410,6 @@ summary(trans_fit_without)
 par(mfrow=c(2,2))
 olsrr::ols_plot_resid_fit(trans_fit_without)
 olsrr::ols_plot_resid_qq(trans_fit_without)
-MASS::boxcox(trans_fit_without)
 ```
 
 Built the without model with **fit_adjr**
@@ -550,8 +423,9 @@ summary(fit_adjr_without)
 par(mfrow=c(2,2))
 olsrr::ols_plot_resid_fit(fit_adjr_without)
 olsrr::ols_plot_resid_qq(fit_adjr_without)
-MASS::boxcox(fit_adjr_without)
 ```
+
+## Criteria 
 
 #### Cp for models fit without outlier
 
@@ -567,7 +441,6 @@ olsrr::ols_mallows_cp(fit_adjr_without,trans_fit) #-14.49
 AIC(fit_back_without) # 1371.373
 AIC(trans_fit_without) #1375.258
 AIC(fit_adjr_without) # 1371.363
-AIC(fit_back_int_without) #1344.376
 ```
 
 
@@ -577,7 +450,6 @@ AIC(fit_back_int_without) #1344.376
 BIC(fit_back_without) #1424.441
 BIC(trans_fit_without) #1440,573
 BIC(fit_adjr_without) # 1428.514
-BIC(fit_back_int_without) #1401.527
 ```
 
 #### MSE
@@ -591,12 +463,7 @@ mean(trans_without_summ$residuals^2)
 
 adjr_without_summ =summary(fit_adjr_without) #1.2575
 mean(adjr_without_summ$residuals^2)
-
-int_without_summ =summary(fit_back_int_without) #1.18
-mean(int_without_summ$residuals^2)
-
 ```
-
 
 # Model Validation
 
@@ -618,34 +485,26 @@ cv_df =
   mutate(
     fit_back = map(train, ~lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + region + pbeds_1000 + density_pop, data = .x)),
     trans_fit = map(train, ~lm(crm_1000_sqr ~ pop + pop18 + pop65+ hsgrad + bagrad + poverty + unemp + pcincome + region+ +pdocs_1000+pbeds_1000 + density_pop, data = .x)),
-    fit_adjr = map(train, ~lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + pcincome + region+ pbeds_1000 + density_pop, data = .x)),
-    fit_back_int_without = map(train,~lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + region + pbeds_1000 + density_pop + pcincome*poverty, data = .x))
-    ) %>% 
+    fit_adjr = map(train, ~lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + pcincome + region+ pbeds_1000 + density_pop, data = .x))) %>% 
   mutate(
     rmse_back = map2_dbl(fit_back, test, ~rmse(model = .x, data = .y)),
     rmse_full = map2_dbl(trans_fit, test, ~rmse(model = .x, data = .y)),
-    rmse_adjr = map2_dbl(fit_adjr, test, ~rmse(model = .x, data = .y)),
-    rmse_bain = map2_dbl(fit_back_int_without, test, ~rmse(model = .x, data = .y))) %>%
+    rmse_adjr = map2_dbl(fit_adjr, test, ~rmse(model = .x, data = .y))) %>%
   mutate(
     mspe_back = map2_dbl(fit_back, test, ~ mean((.y$crm_1000_sqr -predict.lm(.x,.y))^2)),
     mspe_full = map2_dbl(trans_fit, test, ~ mean((.y$crm_1000_sqr -predict.lm(.x,.y))^2)),
-    mspe_adjr = map2_dbl(fit_adjr, test, ~ mean((.y$crm_1000_sqr -predict.lm(.x,.y))^2)),
-    mspe_bain = map2_dbl(fit_back_int_without, test, ~ mean((.y$crm_1000_sqr -predict.lm(.x,.y))^2))
-  ) %>% 
+    mspe_adjr = map2_dbl(fit_adjr, test, ~ mean((.y$crm_1000_sqr -predict.lm(.x,.y))^2))) %>% 
   mutate(
     res_back = map(fit_back, broom::glance %>% as.data.frame),
     res_full = map(trans_fit, broom::glance %>% as.data.frame),
-    res_adjr = map(fit_adjr, broom::glance %>% as.data.frame),
-    res_bain = map(fit_back_int_without, broom::glance %>% as.data.frame),
-    ) %>%
-  unnest(res_back, res_full, res_adjr, res_bain) %>%
-  dplyr::select(rmse_back,rmse_full,rmse_adjr,rmse_bain,
-                mspe_back,mspe_full,mspe_adjr,mspe_bain,
-                value.adj.r.squared,value.adj.r.squared1,value.adj.r.squared2,value.adj.r.squared3) %>%
+    res_adjr = map(fit_adjr, broom::glance %>% as.data.frame)) %>%
+  unnest(res_back, res_full, res_adjr) %>%
+  dplyr::select(rmse_back,rmse_full,rmse_adjr,
+                mspe_back,mspe_full,mspe_adjr,
+                value.adj.r.squared,value.adj.r.squared1,value.adj.r.squared2) %>%
   rename(adjR_back = value.adj.r.squared,
          adjR_full = value.adj.r.squared1,
-         adjR_adjr = value.adj.r.squared2,
-         adjR_bain = value.adj.r.squared3)
+         adjR_adjr = value.adj.r.squared2)
 
 cv_df %>%
   summarise_each(funs(mean( .,na.rm = TRUE))) %>%
@@ -653,11 +512,10 @@ cv_df %>%
 ```
 
 
-
 ## Plot the violin plot
 ```{r warning=FALSE}
 unnest_cd_df = cv_df %>%
-  pivot_longer(rmse_back:adjR_bain, 
+  pivot_longer(rmse_back:adjR_adjr, 
                names_pattern = "(.*)(....)$", 
                names_to = c("limit", "model")) %>% 
   mutate(limit=ifelse(limit=="", "value", limit)) %>%
@@ -671,10 +529,3 @@ unnest_cd_df = cv_df %>%
 unnest_cd_df %>% ggplot(aes(x = model, y = rmse)) + geom_violin() 
 unnest_cd_df %>% ggplot(aes(x = model, y = adjR)) + geom_violin() 
 ```
-
-```{r}
-olsrr::ols_plot_resid_qq(fit_back_int_without)
-olsrr::ols_plot_resid_fit(fit_back_int_without)
-MASS::boxcox(fit_back_int_without)
-```
-
