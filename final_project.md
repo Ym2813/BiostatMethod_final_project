@@ -793,7 +793,7 @@ get_model_formula(12, models, "crm_1000_sqr")
     ## crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + 
     ##     pcincome + regionnorthcentral + regionsouth + regionwest + 
     ##     pbeds_1000 + density_pop
-    ## <environment: 0x7f8746bf5920>
+    ## <environment: 0x7fd744257e50>
 
 ``` r
 fit_adjr = lm(crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + unemp + pcincome + region+ pbeds_1000 + density_pop, data = cdi_trans)
@@ -827,7 +827,7 @@ get_model_formula(11, models, "crm_1000_sqr")
     ## crm_1000_sqr ~ pop + pop18 + hsgrad + bagrad + poverty + pcincome + 
     ##     regionnorthcentral + regionsouth + regionwest + pbeds_1000 + 
     ##     density_pop
-    ## <environment: 0x7f874acab4d8>
+    ## <environment: 0x7fd748a56588>
 
 crm_1000_sqr \~ pop + pop18 + hsgrad + bagrad + poverty + pcincome +
 region+ pbeds_1000 + density_pop
@@ -1117,22 +1117,22 @@ olsrr::ols_plot_resid_qq(fit_adjr_without)
 #### Cp for models fit without outlier
 
 ``` r
-olsrr::ols_mallows_cp(fit_back_without,trans_fit) #-14.65
+olsrr::ols_mallows_cp(fit_back_without,trans_fit_without) # 7.047
 ```
 
-    ## [1] -14.65265
+    ## [1] 7.047472
 
 ``` r
-olsrr::ols_mallows_cp(trans_fit_without,trans_fit)# -10.59
+olsrr::ols_mallows_cp(trans_fit_without,trans_fit_without)# 11
 ```
 
-    ## [1] -10.5956
+    ## [1] 11
 
 ``` r
-olsrr::ols_mallows_cp(fit_adjr_without,trans_fit) #-14.49
+olsrr::ols_mallows_cp(fit_adjr_without,trans_fit_without) # 7.102
 ```
 
-    ## [1] -14.49878
+    ## [1] 7.102026
 
 #### AIC
 

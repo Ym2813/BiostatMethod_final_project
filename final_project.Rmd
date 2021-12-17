@@ -430,9 +430,9 @@ olsrr::ols_plot_resid_qq(fit_adjr_without)
 #### Cp for models fit without outlier
 
 ```{r}
-olsrr::ols_mallows_cp(fit_back_without,trans_fit) #-14.65
-olsrr::ols_mallows_cp(trans_fit_without,trans_fit)# -10.59
-olsrr::ols_mallows_cp(fit_adjr_without,trans_fit) #-14.49
+olsrr::ols_mallows_cp(fit_back_without,trans_fit_without) # 7.047
+olsrr::ols_mallows_cp(trans_fit_without,trans_fit_without)# 11
+olsrr::ols_mallows_cp(fit_adjr_without,trans_fit_without) # 7.102
 ```
 
 #### AIC
