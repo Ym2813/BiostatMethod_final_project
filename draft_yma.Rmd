@@ -556,9 +556,9 @@ MASS::boxcox(fit_adjr_without)
 #### Cp for models fit without outlier
 
 ```{r}
-olsrr::ols_mallows_cp(fit_back_without,trans_fit) #-14.65
-olsrr::ols_mallows_cp(trans_fit_without,trans_fit)# -10.59
-olsrr::ols_mallows_cp(fit_adjr_without,trans_fit) #-14.49
+olsrr::ols_mallows_cp(fit_back_without,trans_fit_without) # 7.047
+olsrr::ols_mallows_cp(trans_fit_without,trans_fit_without)# 11
+olsrr::ols_mallows_cp(fit_adjr_without,trans_fit_without) # 7.102
 ```
 
 #### AIC
@@ -676,5 +676,18 @@ unnest_cd_df %>% ggplot(aes(x = model, y = adjR)) + geom_violin()
 olsrr::ols_plot_resid_qq(fit_back_int_without)
 olsrr::ols_plot_resid_fit(fit_back_int_without)
 MASS::boxcox(fit_back_int_without)
+```
+
+```{r}
+locfit::cp(fit_back_without)
+```
+
+```{r}
+models1 <- regsubsets(crm_1000_sqr ~., data = cdi_trans_without,nvmax = 12)
+res_sum1 = summary(models1)
+
+par(mfrow=c(1,2))
+plot(1:12, res_sum1$cp, xlab="No of parameters", ylab="Cp Statistic")
+plot(1:12, res_sum1$adjr2, xlab="No of parameters", ylab="Adj R2")
 ```
 
